@@ -461,7 +461,7 @@ const estilos = StyleSheet.create({
   cabeceraCaptura: { minHeight: 34, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 14, paddingHorizontal: 10, backgroundColor: COLOR_TINTA },
   textoCabeceraCaptura: { color: '#f5fbfd', fontFamily: FUENTE_TEXTO, fontSize: 7, fontWeight: '900', letterSpacing: 0.7 },
   marcoCaptura: { position: 'relative', padding: 8, backgroundColor: COLOR_PAPEL, borderRightWidth: 3, borderBottomWidth: 3, borderLeftWidth: 3, borderColor: COLOR_TINTA },
-  imagenCaptura: { width: '100%', aspectRatio: 1913 / 941, backgroundColor: '#ffffff', filter: Platform.OS === 'web' ? 'saturate(0.82) contrast(1.03)' : undefined },
+  imagenCaptura: { width: '100%', aspectRatio: 1264 / 771, backgroundColor: '#ffffff', filter: Platform.OS === 'web' ? 'saturate(0.94) contrast(1.02)' : undefined },
   pieCaptura: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, paddingTop: 12 },
   tituloPieCaptura: { color: COLOR_TINTA, fontFamily: FUENTE_TITULOS, fontSize: 22, lineHeight: 25 },
   descripcionPieCaptura: { maxWidth: 520, color: '#20333a', fontFamily: FUENTE_TEXTO, fontSize: 8, lineHeight: 14 },

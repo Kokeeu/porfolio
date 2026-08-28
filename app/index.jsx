@@ -315,6 +315,7 @@ const TarjetaProyecto = ({ item, index, ancho, destacado, esMovil }) => {
             style={[
               estilos.contenedorImagenProyecto,
               destacado && estilos.contenedorImagenProyectoDestacado,
+              destacado && tieneCaptura && estilos.contenedorImagenProyectoDestacadoSiwo,
               esMovil && { height: altoPortadaMovil },
             ]}
           >
@@ -326,14 +327,16 @@ const TarjetaProyecto = ({ item, index, ancho, destacado, esMovil }) => {
             ]}>
               {tieneCaptura ? (
                 <>
-                  <Image
-                    source={require('../assets/projects/siwo.png')}
-                    style={estilos.capturaProyecto}
-                    resizeMode="cover"
-                    accessibilityLabel="Captura de la interfaz de Siwö"
-                  />
+                  <View style={estilos.laminaCapturaProyecto}>
+                    <Image
+                      source={require('../assets/projects/siwo.png')}
+                      style={estilos.capturaProyectoCompleta}
+                      resizeMode="contain"
+                      accessibilityLabel="Captura completa de la interfaz de Siwö"
+                    />
+                  </View>
                   <View pointerEvents="none" style={estilos.veloCapturaProyecto} />
-                  <View style={estilos.fichaCapturaProyecto}>
+                  <View style={destacado ? estilos.fichaCapturaProyectoDestacada : estilos.fichaCapturaProyecto}>
                     <Text style={estilos.etiquetaCapturaProyecto}>CAPTURA REAL / PRODUCT UI</Text>
                     <Text style={estilos.nombreCapturaProyecto}>SIWÖ</Text>
                   </View>
@@ -1024,13 +1027,16 @@ const estilos = StyleSheet.create({
   interiorProyectoDestacado: { flexDirection: 'row' },
   contenedorImagenProyecto: { height: 200, backgroundColor: '#d9e8ed', overflow: 'hidden', borderBottomWidth: 3, borderBottomColor: '#111111' },
   contenedorImagenProyectoDestacado: { width: '55%', height: '100%', borderBottomWidth: 0, borderRightWidth: 3, borderRightColor: '#111111' },
+  contenedorImagenProyectoDestacadoSiwo: { width: '62%' },
   portadaRepositorio: { flex: 1, position: 'relative', overflow: 'hidden', padding: 17, backgroundColor: '#f8fcfd' },
-  portadaRepositorioConCaptura: { padding: 0, backgroundColor: '#f8fcfd' },
+  portadaRepositorioConCaptura: { padding: 0, alignItems: 'stretch', justifyContent: 'flex-start', backgroundColor: '#f8fcfd' },
   portadaRepositorioGris: { backgroundColor: '#dce9ed' },
   portadaRepositorioRoja: { backgroundColor: '#d6edf4' },
-  capturaProyecto: { ...StyleSheet.absoluteFillObject, width: '100%', height: '100%', filter: Platform.OS === 'web' ? 'saturate(0.72) contrast(1.06)' : undefined },
-  veloCapturaProyecto: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(238,247,250,0.12)', borderWidth: 6, borderColor: 'rgba(248,252,253,0.7)' },
+  laminaCapturaProyecto: { width: '100%', aspectRatio: 1264 / 771, overflow: 'hidden', backgroundColor: '#f8fcfd', borderBottomWidth: 3, borderBottomColor: COLOR_MORADO },
+  capturaProyectoCompleta: { width: '100%', height: '100%', filter: Platform.OS === 'web' ? 'saturate(0.9) contrast(1.03)' : undefined },
+  veloCapturaProyecto: { ...StyleSheet.absoluteFillObject, backgroundColor: 'transparent', borderWidth: 6, borderColor: 'rgba(248,252,253,0.7)' },
   fichaCapturaProyecto: { position: 'absolute', left: 12, bottom: 12, minWidth: 154, paddingHorizontal: 10, paddingVertical: 7, backgroundColor: 'rgba(17,17,17,0.92)', borderLeftWidth: 5, borderLeftColor: COLOR_MORADO },
+  fichaCapturaProyectoDestacada: { position: 'absolute', left: 18, bottom: 20, width: 176, paddingHorizontal: 10, paddingVertical: 7, backgroundColor: '#111111', borderLeftWidth: 5, borderLeftColor: COLOR_MORADO },
   etiquetaCapturaProyecto: { color: '#b9cdd4', fontFamily: FUENTE_TEXTO, fontSize: 6, fontWeight: '900', letterSpacing: 0.6 },
   nombreCapturaProyecto: { color: '#f5fbfd', fontFamily: FUENTE_TITULOS, fontSize: 22, lineHeight: 25, letterSpacing: 0.5 },
   rutaRepositorio: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 7, fontWeight: '900', letterSpacing: 0.7 },
