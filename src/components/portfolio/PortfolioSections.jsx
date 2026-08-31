@@ -49,7 +49,7 @@ export function VisualLab({ compact }) {
       </View>
       <View style={[styles.labCanvas, compact && styles.labCanvasCompact]}>
         <LabTile source={require('../../../assets/editorial/chroma-knot.jpg')} label="A / CHROMA" style={styles.labTileA} />
-        <LabTile source={require('../../../assets/editorial/future-poster.jpg')} label="B / TYPE" style={styles.labTileB} />
+        <LabTile source={require('../../../assets/editorial/signal-kit.jpg')} label="B / SIGNAL KIT" style={styles.labTileB} />
         <LabTile source={require('../../../assets/editorial/signal-eye.jpg')} label="C / SIGNAL" style={styles.labTileC} />
         <View style={styles.labCross}><Text style={styles.labCrossText}>＋</Text></View>
         <Text style={styles.labAnnotation}>ESTRUCTURA{`\n`}ANTES QUE EFECTO →</Text>
@@ -62,7 +62,7 @@ export function About({ compact }) {
   return (
     <View style={[styles.about, compact && styles.aboutCompact]}>
       <View style={[styles.aboutVisual, compact && styles.aboutVisualCompact]}>
-        <Image source={require('../../../assets/editorial/future-poster.jpg')} style={styles.aboutImage} resizeMode="cover" accessibilityLabel="Póster editorial monocromático de inspiración futurista" />
+        <Image source={require('../../../assets/editorial/shape-atlas.jpg')} style={styles.aboutImage} resizeMode="cover" accessibilityLabel="Atlas editorial de formas geométricas en blanco y negro" />
         <View style={styles.aboutIndex}><Text style={styles.aboutIndexText}>AS / 26</Text></View>
       </View>
       <View style={styles.aboutCopyWrap}>
