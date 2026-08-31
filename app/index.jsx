@@ -2,8 +2,6 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Animated as AnimatedNative,
-  Easing,
   Image,
   Linking,
   Platform,
@@ -14,1095 +12,698 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import AnimatedReanimated, {
-  FadeIn,
-  FadeInDown,
-  useReducedMotion,
-} from 'react-native-reanimated';
+import Reanimated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { FontAwesome5, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { obtenerCasoProyecto, seleccionarProyectos } from '../data/proyectos';
+import {
+  obtenerCasoProyecto,
+  PROYECTOS_DESTACADOS,
+  seleccionarProyectos,
+} from '../data/proyectos';
 
 const GITHUB_USUARIO = 'Kokeeu';
 const CORREO = 'andersonsolanochavarria@gmail.com';
 const LINKEDIN = 'https://www.linkedin.com/in/anderson-solano-chavarria-75a5763b8';
-const COLOR_MORADO = '#79c6d8';
-const FUENTE_TITULOS = Platform.OS === 'web' ? 'Anton' : undefined;
-const FUENTE_TEXTO = Platform.OS === 'web' ? 'IBM Plex Mono' : undefined;
+const AZUL = '#2028f7';
+const AZUL_OSCURO = '#09107f';
+const HIELO = '#f7f5ed';
+const LILA = '#c9c6ff';
+const ROJO = '#ff4136';
+const NEGRO = '#09090b';
+const GRIS = '#676978';
+const DISPLAY = Platform.OS === 'web' ? 'Anton' : undefined;
+const MONO = Platform.OS === 'web' ? 'IBM Plex Mono' : undefined;
+const MANO = Platform.OS === 'web' ? 'Caveat' : undefined;
 
-const TramaPuntos = ({ style }) => (
-  <View pointerEvents="none" style={[estilos.tramaPuntos, style]}>
-    {Array.from({ length: 96 }, (_, indice) => (
-      <View key={indice} style={[estilos.puntoTrama, indice % 5 === 0 && estilos.puntoTramaGrande]} />
-    ))}
-  </View>
-);
+const repositoriosBase = PROYECTOS_DESTACADOS.map((nombre, indice) => {
+  const caso = obtenerCasoProyecto(nombre);
+  return {
+    id: `local-${nombre}`,
+    name: nombre,
+    html_url: `https://github.com/${GITHUB_USUARIO}/${nombre}`,
+    homepage: caso?.demo,
+    language: caso?.stack?.[0] || 'JavaScript',
+    stargazers_count: 0,
+    updated_at: '2026-01-01T00:00:00Z',
+    ordenLocal: indice,
+  };
+});
 
-const CodigoBarras = () => (
-  <View style={estilos.codigoBarras}>
-    {[2, 5, 2, 3, 6, 2, 4, 2, 7, 3, 2, 5, 2, 4, 6, 2].map((ancho, indice) => (
-      <View key={indice} style={[estilos.barraCodigo, { width: ancho }]} />
-    ))}
-  </View>
-);
-
-const MarcaRegistro = ({ style }) => (
-  <View pointerEvents="none" style={[estilos.marcaRegistro, style]}>
-    <View style={estilos.circuloRegistro} />
-    <View style={estilos.lineaRegistroHorizontal} />
-    <View style={estilos.lineaRegistroVertical} />
-    <View style={estilos.puntoRegistro} />
-  </View>
-);
-
-const MarcasCorte = ({ style }) => (
-  <View pointerEvents="none" style={[StyleSheet.absoluteFillObject, estilos.marcasCorte, style]}>
-    <View style={[estilos.marcaCorteHorizontal, estilos.corteSuperiorIzquierdoH]} />
-    <View style={[estilos.marcaCorteVertical, estilos.corteSuperiorIzquierdoV]} />
-    <View style={[estilos.marcaCorteHorizontal, estilos.corteSuperiorDerechoH]} />
-    <View style={[estilos.marcaCorteVertical, estilos.corteSuperiorDerechoV]} />
-    <View style={[estilos.marcaCorteHorizontal, estilos.corteInferiorIzquierdoH]} />
-    <View style={[estilos.marcaCorteVertical, estilos.corteInferiorIzquierdoV]} />
-    <View style={[estilos.marcaCorteHorizontal, estilos.corteInferiorDerechoH]} />
-    <View style={[estilos.marcaCorteVertical, estilos.corteInferiorDerechoV]} />
-  </View>
-);
-
-const SeparadorLecturaMovil = ({ pagina, texto }) => (
-  <View pointerEvents="none" style={estilos.separadorLecturaMovil}>
-    <View style={estilos.lineaSeparadorMovil} />
-    <View style={estilos.etiquetaSeparadorMovil}>
-      <Text style={estilos.textoSeparadorMovil}>{texto}</Text>
-      <Text style={estilos.paginaSeparadorMovil}>PÁG. {pagina}</Text>
-    </View>
-    <View style={estilos.lineaSeparadorMovil} />
-  </View>
-);
-
-const FondoEditorial = () => (
-  <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-    {Array.from({ length: 34 }, (_, indice) => (
+const Trama = ({ style, clara = false, roja = false }) => (
+  <View pointerEvents="none" style={[styles.trama, style]}>
+    {Array.from({ length: 126 }, (_, indice) => (
       <View
         key={indice}
         style={[
-          estilos.lineaPapel,
-          {
-            top: `${indice * 3}%`,
-            opacity: indice % 4 === 0 ? 0.05 : 0.022,
-            transform: [{ rotate: `${indice % 2 === 0 ? -0.25 : 0.2}deg` }],
-          },
+          styles.punto,
+          { backgroundColor: clara ? HIELO : roja ? ROJO : AZUL, opacity: indice % 8 === 0 ? 0.85 : 0.28 },
         ]}
       />
     ))}
-    <TramaPuntos style={estilos.tramaFondoSuperior} />
-    <TramaPuntos style={estilos.tramaFondoInferior} />
-    <MarcaRegistro style={estilos.registroFondoSuperior} />
-    <MarcaRegistro style={estilos.registroFondoInferior} />
   </View>
 );
 
-const BotonAnimado = ({ children, onPress, style, accessibilityLabel }) => {
-  const escala = useRef(new AnimatedNative.Value(1)).current;
+const Estrella = ({ style, clara = false, pequena = false }) => (
+  <Text pointerEvents="none" style={[styles.estrella, clara && styles.estrellaClara, pequena && styles.estrellaPequena, style]}>✦</Text>
+);
 
-  const presionarIn = () => {
-    AnimatedNative.spring(escala, {
-      toValue: 0.97,
-      useNativeDriver: true,
-      speed: 24,
-      bounciness: 2,
-    }).start();
-  };
+const Etiqueta = ({ children, azul = false, roja = false, style }) => (
+  <View style={[styles.etiqueta, azul && styles.etiquetaAzul, roja && styles.etiquetaRoja, style]}>
+    <Text style={[styles.etiquetaTexto, (azul || roja) && styles.etiquetaTextoClaro]}>{children}</Text>
+  </View>
+);
 
-  const presionarOut = () => {
-    AnimatedNative.spring(escala, {
-      toValue: 1,
-      useNativeDriver: true,
-      friction: 5,
-      tension: 55,
-    }).start();
-  };
+const BarraVentana = ({ titulo, clara = false }) => (
+  <View style={[styles.barraVentana, clara && styles.barraVentanaClara]}>
+    <Text style={[styles.barraVentanaTitulo, clara && styles.barraVentanaTituloOscuro]}>{titulo}</Text>
+    <View style={styles.controlesVentana}>
+      <Text style={[styles.controlVentana, clara && styles.controlVentanaOscuro]}>—</Text>
+      <Text style={[styles.controlVentana, clara && styles.controlVentanaOscuro]}>□</Text>
+      <Text style={[styles.controlVentana, clara && styles.controlVentanaOscuro]}>×</Text>
+    </View>
+  </View>
+);
 
-  return (
-    <Pressable
-      onPressIn={presionarIn}
-      onPressOut={presionarOut}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-    >
-      <AnimatedNative.View style={[style, { transform: [{ scale: escala }] }]}>
-        {children}
-      </AnimatedNative.View>
-    </Pressable>
-  );
-};
+const Boton = ({ children, onPress, claro = false, azul = false, icono, label }) => (
+  <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress}>
+    {({ pressed }) => (
+      <View style={[styles.boton, claro && styles.botonClaro, azul && styles.botonAzul, pressed && styles.botonPresionado]}>
+        <Text style={[styles.botonTexto, azul && styles.botonTextoClaro]}>{children}</Text>
+        {icono}
+      </View>
+    )}
+  </Pressable>
+);
 
-const VinetaRevelable = ({ children, style, delay = 0, direccion = 'derecha' }) => {
-  const reducirMovimiento = useReducedMotion();
-  const progreso = useRef(new AnimatedNative.Value(reducirMovimiento ? 1 : 0)).current;
-  const referencia = useRef(null);
-  const yaRevelada = useRef(false);
+const DecoracionFondo = () => (
+  <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+    <View style={styles.lineaFondoA} />
+    <View style={styles.lineaFondoB} />
+    <Trama style={styles.tramaFondoA} />
+    <Trama style={styles.tramaFondoB} />
+    <Text style={styles.fondoCruz}>＋</Text>
+  </View>
+);
 
-  useEffect(() => {
-    let observador;
-
-    if (reducirMovimiento) {
-      progreso.setValue(1);
-      return undefined;
-    }
-
-    const revelar = () => {
-      if (yaRevelada.current) return;
-      yaRevelada.current = true;
-      AnimatedNative.sequence([
-        AnimatedNative.delay(delay),
-        AnimatedNative.timing(progreso, {
-          toValue: 1,
-          duration: 460,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]).start();
-    };
-
-    if (
-      Platform.OS === 'web'
-      && typeof window !== 'undefined'
-      && 'IntersectionObserver' in window
-      && referencia.current
-    ) {
-      observador = new window.IntersectionObserver(
-        (entradas) => {
-          if (entradas.some((entrada) => entrada.isIntersecting)) {
-            revelar();
-            observador?.disconnect();
-          }
-        },
-        { threshold: 0.16, rootMargin: '0px 0px -6% 0px' }
-      );
-      observador.observe(referencia.current);
-    } else {
-      revelar();
-    }
-
-    return () => {
-      observador?.disconnect();
-    };
-  }, [delay, progreso, reducirMovimiento]);
-
-  const desplazamientoX = progreso.interpolate({
-    inputRange: [0, 1],
-    outputRange: [direccion === 'izquierda' ? -18 : 18, 0],
-  });
-  const desplazamientoY = progreso.interpolate({
-    inputRange: [0, 1],
-    outputRange: [18, 0],
-  });
-  const rotacion = progreso.interpolate({
-    inputRange: [0, 1],
-    outputRange: [direccion === 'izquierda' ? '-1.2deg' : '1.2deg', '0deg'],
-  });
-
-  return (
-    <AnimatedNative.View
-      ref={referencia}
-      style={[
-        style,
-        {
-          opacity: progreso,
-          transform: [
-            { translateX: desplazamientoX },
-            { translateY: desplazamientoY },
-            { rotate: rotacion },
-          ],
-        },
-      ]}
-    >
-      {children}
-    </AnimatedNative.View>
-  );
-};
-
-const TarjetaProyecto = ({ item, index, ancho, destacado, esMovil }) => {
-  const router = useRouter();
-  const caso = obtenerCasoProyecto(item.name);
-  const urlDemo = item.homepage || caso?.demo;
-  const tieneDemo = Boolean(urlDemo);
-  const anoActualizacion = item.updated_at ? new Date(item.updated_at).getFullYear() : '2026';
-  const nombreProyecto = caso?.titulo || item.name.replace(/-/g, ' ');
-  const nombreLargo = nombreProyecto.length > 17;
-  const tieneCaptura = item.name.toLowerCase() === 'siwo';
-  const altoPortadaMovil = [252, 184, 224][index % 3];
-  const altoTarjetaMovil = [526, 458, 496][index % 3];
-  const desplazamientoHover = useRef(new AnimatedNative.Value(0)).current;
-
-  const animarHover = (activo) => {
-    AnimatedNative.timing(desplazamientoHover, {
-      toValue: activo ? 1 : 0,
-      duration: activo ? 130 : 180,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const eventosHover = Platform.OS === 'web'
-    ? {
-        onMouseEnter: () => animarHover(true),
-        onMouseLeave: () => animarHover(false),
-      }
-    : {};
-
-  return (
-    <VinetaRevelable
-      delay={(index % 3) * 85}
-      direccion={index % 2 === 0 ? 'izquierda' : 'derecha'}
-      style={[estilos.celdaProyecto, esMovil && estilos.celdaProyectoMovil, { width: ancho }]}
-    >
-      <MarcasCorte />
-      {esMovil && (
-        <Text
-          pointerEvents="none"
-          style={[
-            estilos.folioProyectoMovil,
-            index % 2 === 1
-              ? estilos.folioProyectoMovilDerecho
-              : estilos.folioProyectoMovilIzquierdo,
-          ]}
-        >
-          PÁG. {String(index + 2).padStart(2, '0')} / ARCHIVO {String(index + 1).padStart(2, '0')}
-        </Text>
-      )}
-      <AnimatedNative.View
-        pointerEvents="none"
-        style={[estilos.sombraRegistroProyecto, { opacity: desplazamientoHover }]}
+const HeroCollage = ({ movil }) => (
+  <View style={[styles.collage, movil && styles.collageMovil]}>
+    <View style={styles.collageFondoNegro} />
+    <View style={styles.collageFondoLila} />
+    <View style={styles.collageAroA} />
+    <View style={styles.collageAroB} />
+    <Trama clara style={styles.collageTrama} />
+    <View style={styles.collageVentana}>
+      <BarraVentana titulo="PROFILE.JPG" />
+      <Image
+        source={require('../assets/icon.png')}
+        style={styles.collageRetrato}
+        resizeMode="cover"
+        accessibilityLabel="Ilustración de Anderson Solano"
       />
-      <AnimatedNative.View
-        {...eventosHover}
-        style={[
-          estilos.envolturaTarjetaProyecto,
-          {
-            transform: [
-              {
-                translateX: desplazamientoHover.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, -5],
-                }),
-              },
-              {
-                translateY: desplazamientoHover.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, -5],
-                }),
-              },
-            ],
-          },
-        ]}
+      <View style={styles.collageVentanaPie}>
+        <Text style={styles.collageVentanaPieTexto}>100% / RGB / CR</Text>
+        <Text style={styles.collageVentanaPieTexto}>READY</Text>
+      </View>
+    </View>
+    <View style={styles.collageRecorte}>
+      <Image source={require('../assets/icon.png')} style={styles.collageRecorteImagen} resizeMode="cover" accessibilityElementsHidden />
+    </View>
+    <View style={styles.collageCursor}>
+      <Ionicons name="navigate" size={30} color={NEGRO} />
+      <Text style={styles.collageCursorTexto}>ANDERSON.EXE</Text>
+    </View>
+    <View style={styles.collageNota}>
+      <Text style={styles.collageNotaTexto}>frontend con obsesión{`\n`}por los detalles ↗</Text>
+    </View>
+    <View style={styles.collageArchivo}>
+      <Text style={styles.collageArchivoNumero}>01</Text>
+      <Text style={styles.collageArchivoTexto}>PERSONAL{`\n`}FILE</Text>
+    </View>
+    <Estrella clara style={styles.collageEstrellaA} />
+    <Estrella clara pequena style={styles.collageEstrellaB} />
+    <Text style={styles.collageTextoVertical}>WEB / MOBILE / VISUAL DIRECTION / 2026</Text>
+  </View>
+);
+
+const AccionesProyecto = ({ item, caso, oscuro = false }) => {
+  const router = useRouter();
+  const demo = item.homepage || caso?.demo;
+  const tintaCodigo = oscuro ? HIELO : NEGRO;
+
+  return (
+    <View style={styles.accionesProyecto}>
+      <Boton
+        azul
+        label={`Leer caso de ${caso.titulo}`}
+        onPress={() => router.push({ pathname: '/proyecto/[nombre]', params: { nombre: item.name } })}
+        icono={<Ionicons name="arrow-forward" size={14} color={HIELO} />}
       >
-        <View
-          style={[
-            estilos.tarjetaProyecto,
-            index % 2 === 1 && estilos.tarjetaProyectoAlterna,
-            esMovil && { minHeight: altoTarjetaMovil },
-          ]}
+        LEER EL CASO
+      </Boton>
+      {demo ? (
+        <Boton
+          claro={oscuro}
+          label={`Abrir demo de ${caso.titulo}`}
+          onPress={() => Linking.openURL(demo)}
+          icono={<MaterialCommunityIcons name="open-in-new" size={14} color={NEGRO} />}
         >
-        <View style={estilos.cabeceraFichaProyecto}>
-          <Text style={estilos.textoFichaProyecto}>ARCHIVO Nº {String(index + 1).padStart(2, '0')}</Text>
-          <Text style={estilos.textoFichaProyecto}>ACT. {anoActualizacion}</Text>
-        </View>
-
-        <View style={[estilos.interiorProyecto, destacado && estilos.interiorProyectoDestacado]}>
-          <View
-            style={[
-              estilos.contenedorImagenProyecto,
-              destacado && estilos.contenedorImagenProyectoDestacado,
-              destacado && tieneCaptura && estilos.contenedorImagenProyectoDestacadoSiwo,
-              esMovil && { height: altoPortadaMovil },
-            ]}
-          >
-            <View style={[
-              estilos.portadaRepositorio,
-              index % 3 === 1 && estilos.portadaRepositorioGris,
-              index % 3 === 2 && estilos.portadaRepositorioRoja,
-              tieneCaptura && estilos.portadaRepositorioConCaptura,
-            ]}>
-              {tieneCaptura ? (
-                <>
-                  <View style={estilos.laminaCapturaProyecto}>
-                    <Image
-                      source={require('../assets/projects/siwo.png')}
-                      style={estilos.capturaProyectoCompleta}
-                      resizeMode="contain"
-                      accessibilityLabel="Captura completa de la interfaz de Siwö"
-                    />
-                  </View>
-                  <View pointerEvents="none" style={estilos.veloCapturaProyecto} />
-                  <View style={destacado ? estilos.fichaCapturaProyectoDestacada : estilos.fichaCapturaProyecto}>
-                    <Text style={estilos.etiquetaCapturaProyecto}>CAPTURA REAL / PRODUCT UI</Text>
-                    <Text style={estilos.nombreCapturaProyecto}>SIWÖ</Text>
-                  </View>
-                </>
-              ) : (
-                <>
-                  <Text style={estilos.rutaRepositorio}>GITHUB.COM / KOKEEU /</Text>
-                  <Text
-                    numberOfLines={3}
-                    style={[
-                      estilos.nombrePortadaRepositorio,
-                      destacado && estilos.nombrePortadaRepositorioDestacada,
-                      nombreLargo && estilos.nombrePortadaRepositorioLargo,
-                    ]}
-                  >
-                    {nombreProyecto}
-                  </Text>
-                  <View style={estilos.metricasPortada}>
-                    <View><Text style={estilos.valorMetrica}>{item.open_issues_count || 0}</Text><Text style={estilos.etiquetaMetrica}>ISSUES</Text></View>
-                    <View><Text style={estilos.valorMetrica}>{item.stargazers_count || 0}</Text><Text style={estilos.etiquetaMetrica}>STARS</Text></View>
-                    <View><Text style={estilos.valorMetrica}>{item.forks_count || 0}</Text><Text style={estilos.etiquetaMetrica}>FORKS</Text></View>
-                  </View>
-                  <Image
-                    source={require('../assets/icon.png')}
-                    style={[estilos.retratoPortadaProyecto, destacado && estilos.retratoPortadaProyectoDestacado]}
-                    resizeMode="cover"
-                    accessibilityLabel="Ilustración editorial del proyecto"
-                  />
-                  <View style={estilos.lineaEditorialProyecto} />
-                </>
-              )}
-              {destacado && <MarcaRegistro style={estilos.registroPortadaProyecto} />}
-            </View>
-            <TramaPuntos style={estilos.tramaImagenProyecto} />
-            <View style={estilos.numeroProyecto}>
-              <Text accessibilityElementsHidden style={estilos.textoNumeroProyectoDesregistro}>
-                {String(index + 1).padStart(2, '0')}
-              </Text>
-              <Text style={estilos.textoNumeroProyecto}>{String(index + 1).padStart(2, '0')}</Text>
-            </View>
-          </View>
-
-          <View style={[estilos.cuerpoTarjetaProyecto, esMovil && estilos.cuerpoTarjetaProyectoMovil]}>
-            <View style={estilos.filaMetaProyecto}>
-              <View style={estilos.pillLenguaje}>
-                <Text style={estilos.textoLenguaje}>{caso?.categoria || item.language || 'PROYECTO'}</Text>
-              </View>
-              {item.stargazers_count > 0 && (
-                <View style={estilos.estrellasRepositorio}>
-                  <Ionicons name="star" size={12} color="#111111" />
-                  <Text style={estilos.textoEstrellas}>{item.stargazers_count}</Text>
-                </View>
-              )}
-            </View>
-
-            <Text
-              numberOfLines={destacado ? 3 : 2}
-              style={[
-                estilos.tituloTarjeta,
-                destacado && estilos.tituloTarjetaDestacada,
-                nombreLargo && estilos.tituloTarjetaLarga,
-              ]}
-            >
-              {nombreProyecto}
-            </Text>
-            <Text style={estilos.descripcionTarjeta} numberOfLines={destacado ? 5 : 3}>
-              {caso?.resumen || item.description || 'Una pieza del archivo: decisiones de interfaz, desarrollo y código reunidas en un mismo proyecto.'}
-            </Text>
-
-            <View style={estilos.accionesProyecto}>
-              <BotonAnimado
-                style={[estilos.botonProyecto, estilos.botonProyectoPrincipal]}
-                onPress={() => router.push({ pathname: '/proyecto/[nombre]', params: { nombre: item.name } })}
-                accessibilityLabel={`Leer caso de estudio de ${nombreProyecto}`}
-              >
-                <Text style={estilos.textoBotonProyectoPrincipal}>LEER CASO</Text>
-                <Ionicons name="arrow-forward" size={14} color="#f5fbfd" />
-              </BotonAnimado>
-              {tieneDemo && (
-                <BotonAnimado
-                  style={estilos.botonProyecto}
-                  onPress={() => Linking.openURL(urlDemo)}
-                  accessibilityLabel={`Ver demo de ${item.name}`}
-                >
-                  <Text style={estilos.textoBotonProyecto}>DEMO</Text>
-                  <MaterialCommunityIcons name="open-in-new" size={14} color="#111111" />
-                </BotonAnimado>
-              )}
-              <BotonAnimado
-                style={estilos.botonProyecto}
-                onPress={() => Linking.openURL(item.html_url)}
-                accessibilityLabel={`Ver código de ${item.name}`}
-              >
-                <FontAwesome5 name="github" size={14} color="#111111" />
-                <Text style={estilos.textoBotonProyecto}>VER CÓDIGO</Text>
-              </BotonAnimado>
-            </View>
-          </View>
-        </View>
-        </View>
-      </AnimatedNative.View>
-    </VinetaRevelable>
+          DEMO
+        </Boton>
+      ) : null}
+      <Pressable
+        accessibilityRole="link"
+        accessibilityLabel={`Ver código de ${caso.titulo}`}
+        onPress={() => Linking.openURL(item.html_url)}
+        style={[styles.githubProyecto, oscuro && styles.githubProyectoOscuro]}
+      >
+        <FontAwesome5 name="github" size={15} color={tintaCodigo} />
+      </Pressable>
+    </View>
   );
 };
+
+const ProyectoSiwo = ({ item, caso, movil }) => (
+  <Reanimated.View entering={FadeInDown.duration(600)} style={[styles.escena, styles.escenaSiwo, movil && styles.escenaMovil]}>
+    <Text style={styles.numeroFondoSiwo}>01</Text>
+    <View style={[styles.siwoTexto, movil && styles.textoProyectoMovil]}>
+      <Etiqueta roja>OPENINGS / ENDINGS</Etiqueta>
+      <Text style={[styles.tituloProyecto, movil && styles.tituloProyectoMovil]}>SIWÖ</Text>
+      <Text style={styles.bajadaProyecto}>EL OPENING QUE TIENES EN LA CABEZA, PERO NO RECUERDAS CÓMO SE LLAMA.</Text>
+      <Text style={styles.descripcionProyecto}>{caso.resumen}</Text>
+      <View style={styles.miniDatos}>
+        {caso.resultados.map((dato) => <Text key={dato} style={styles.miniDato}>{dato}</Text>)}
+      </View>
+      <AccionesProyecto item={item} caso={caso} />
+    </View>
+    <View style={[styles.siwoVisual, movil && styles.siwoVisualMovil]}>
+      <View style={styles.siwoSombra} />
+      <View style={styles.siwoCapturaMarco}>
+        <BarraVentana clara titulo="SIWO_HOME.PNG" />
+        <Image source={require('../assets/projects/siwo.png')} style={styles.siwoCaptura} resizeMode="contain" accessibilityLabel="Captura real de Siwö" />
+      </View>
+      <View style={styles.siwoSticker}><Text style={styles.siwoStickerTexto}>623{`\n`}SERIES</Text></View>
+      <Text style={styles.siwoAnotacion}>hecho para encontrar{`\n`}esa canción ↓</Text>
+    </View>
+  </Reanimated.View>
+);
+
+const ProyectoCodeCut = ({ item, caso, movil }) => (
+  <Reanimated.View entering={FadeInDown.duration(600)} style={[styles.escena, styles.escenaCodecut, movil && styles.escenaMovil]}>
+    <Trama clara style={styles.codecutTrama} />
+    <View style={[styles.codecutVisual, movil && styles.codecutVisualMovil]}>
+      <Text style={[styles.codecutRatio, movil && styles.codecutRatioMovil]}>9:16</Text>
+      <View style={styles.timelineVentana}>
+        <BarraVentana titulo="TIMELINE_V04.CUT" />
+        <View style={styles.timelineRegla}>
+          {['00', '05', '10', '15', '20'].map((valor) => <Text key={valor} style={styles.timelineReglaTexto}>{valor}</Text>)}
+        </View>
+        {[0, 1, 2, 3].map((fila) => (
+          <View key={fila} style={styles.timelineFila}>
+            <Text style={styles.timelineFilaNumero}>0{fila + 1}</Text>
+            <View style={[styles.timelineClip, fila % 2 === 1 && styles.timelineClipLila, { width: `${34 + fila * 11}%` }]} />
+            <View style={styles.timelineClipNegro} />
+          </View>
+        ))}
+        <View style={styles.timelineCursor} />
+      </View>
+      <View style={styles.codecutPlay}><Ionicons name="play" size={28} color={NEGRO} /></View>
+      <Text style={styles.codecutNota}>corta / mueve / exporta</Text>
+    </View>
+    <View style={[styles.codecutTexto, movil && styles.textoProyectoMovil]}>
+      <Etiqueta azul>VIDEO / FULL-STACK</Etiqueta>
+      <Text style={[styles.tituloProyectoClaro, movil && styles.tituloProyectoMovil]}>CODECUT</Text>
+      <Text style={styles.bajadaProyectoClara}>UN EDITOR VERTICAL DONDE LA TIMELINE MANDA.</Text>
+      <Text style={styles.descripcionProyectoClara}>{caso.resumen}</Text>
+      <View style={styles.codecutStack}>
+        {caso.stack.map((tecnologia) => <Text key={tecnologia} style={styles.codecutStackTexto}>{tecnologia}</Text>)}
+      </View>
+      <AccionesProyecto item={item} caso={caso} oscuro />
+    </View>
+  </Reanimated.View>
+);
+
+const ProyectoPortfolio = ({ item, caso, movil }) => (
+  <Reanimated.View entering={FadeInDown.duration(600)} style={[styles.escena, styles.escenaPortfolio, movil && styles.escenaMovil]}>
+    <View style={styles.portfolioPalabraFondo}>
+      <Text style={[styles.portfolioPalabra, movil && styles.portfolioPalabraMovil]}>THIS{`\n`}SITE{`\n`}IS THE{`\n`}PROJECT</Text>
+    </View>
+    <View style={[styles.portfolioTexto, movil && styles.portfolioTextoMovil]}>
+      <Etiqueta roja>PORTFOLIO / FRONTEND</Etiqueta>
+      <Text style={styles.portfolioNumero}>03 / 04</Text>
+      <Text style={[styles.tituloProyectoClaro, movil && styles.tituloProyectoMovil]}>{caso.titulo}</Text>
+      <Text style={styles.descripcionProyectoClara}>{caso.resumen}</Text>
+      <AccionesProyecto item={item} caso={caso} oscuro />
+    </View>
+    <View style={[styles.portfolioCollage, movil && styles.portfolioCollageMovil]}>
+      <View style={styles.portfolioRetratoGrande}>
+        <Image source={require('../assets/icon.png')} style={styles.portfolioRetratoImagen} resizeMode="cover" accessibilityLabel="Ilustración personal utilizada en el portfolio" />
+      </View>
+      <View style={styles.portfolioPopup}>
+        <BarraVentana clara titulo="ABOUT_ME.TXT" />
+        <Text style={styles.portfolioPopupTexto}>NO ES UNA GALERÍA DE REPOS.{`\n`}{`\n`}ES UNA FORMA DE MOSTRAR CÓMO PIENSO.</Text>
+        <View style={styles.portfolioPopupBoton}><Text style={styles.portfolioPopupBotonTexto}>OK</Text></View>
+      </View>
+      <Estrella clara style={styles.portfolioEstrella} />
+      <Trama clara style={styles.portfolioTrama} />
+    </View>
+  </Reanimated.View>
+);
+
+const ProyectoCorreos = ({ item, caso, movil }) => (
+  <Reanimated.View entering={FadeInDown.duration(600)} style={[styles.escena, styles.escenaCorreos, movil && styles.escenaMovil]}>
+    <View style={[styles.correosTexto, movil && styles.textoProyectoMovil]}>
+      <Etiqueta azul>DATOS / FULL-STACK</Etiqueta>
+      <Text style={[styles.tituloProyecto, styles.tituloCorreos, movil && styles.tituloProyectoMovil]}>BUSCADOR{`\n`}DE CORREOS</Text>
+      <Text style={styles.descripcionProyecto}>{caso.resumen}</Text>
+      <View style={styles.miniDatos}>
+        {caso.resultados.map((dato) => <Text key={dato} style={styles.miniDato}>{dato}</Text>)}
+      </View>
+      <AccionesProyecto item={item} caso={caso} />
+    </View>
+    <View style={[styles.correosVisual, movil && styles.correosVisualMovil]}>
+      <Text style={styles.correosCsv}>CSV</Text>
+      <View style={styles.correoA}><Ionicons name="mail-outline" size={40} color={HIELO} /></View>
+      <View style={styles.correoB}><Ionicons name="business-outline" size={34} color={NEGRO} /></View>
+      <View style={styles.correoC}><Ionicons name="location-outline" size={38} color={NEGRO} /></View>
+      <View style={styles.correoLineaA} />
+      <View style={styles.correoLineaB} />
+      <View style={styles.correoLineaC} />
+      <View style={styles.correosVentana}>
+        <BarraVentana titulo="SEARCH.LOG" />
+        <Text style={styles.correosVentanaTexto}>[01] SEARCHING BUSINESSES...{`\n`}[02] SCRAPING PUBLIC SITES...{`\n`}[03] FILTERING EMAILS...{`\n`}[04] EXPORT READY ✓</Text>
+      </View>
+      <Text style={styles.correosNota}>cinco workers,{`\n`}cero pantallas congeladas</Text>
+    </View>
+  </Reanimated.View>
+);
+
+const Proyecto = ({ item, indice, movil }) => {
+  const caso = obtenerCasoProyecto(item.name);
+  if (!caso) return null;
+  if (indice === 0) return <ProyectoSiwo item={item} caso={caso} movil={movil} />;
+  if (indice === 1) return <ProyectoCodeCut item={item} caso={caso} movil={movil} />;
+  if (indice === 2) return <ProyectoPortfolio item={item} caso={caso} movil={movil} />;
+  return <ProyectoCorreos item={item} caso={caso} movil={movil} />;
+};
+
+const InterludioPersonal = ({ escritorio, movil }) => (
+  <View style={[styles.sobreMi, styles.sobreMiEnLista, !escritorio && styles.sobreMiColumna]}>
+    <View style={styles.sobreMiVisual}>
+      <Text style={styles.sobreMiPalabra}>PERSO{`\n`}NAL</Text>
+      <View style={styles.sobreMiRetratoMarco}>
+        <Image source={require('../assets/icon.png')} style={styles.sobreMiRetrato} resizeMode="cover" accessibilityLabel="Ilustración de Anderson" />
+      </View>
+      <Trama clara style={styles.sobreMiTrama} />
+      <Estrella clara style={styles.sobreMiEstrella} />
+      <View style={styles.sobreMiSticker}><Text style={styles.sobreMiStickerTexto}>DEV{`\n`}WITH{`\n`}TASTE</Text></View>
+    </View>
+    <View style={[styles.sobreMiContenido, movil && styles.sobreMiContenidoMovil]}>
+      <Text style={styles.sobreMiKicker}>PAUSA ENTRE PROYECTOS / SIN BIO CORPORATIVA</Text>
+      <Text style={[styles.sobreMiTitulo, movil && styles.sobreMiTituloMovil]}>NO ME INTERESA QUE TODO PAREZCA UNA LANDING.</Text>
+      <Text style={styles.sobreMiTexto}>Me gusta construir interfaces que tengan una idea detrás: una jerarquía clara, una rareza memorable y código capaz de sostener ambas cosas. Mi trabajo vive entre el frontend y la dirección visual.</Text>
+      <View style={styles.manifiestoLista}>
+        {['CLARIDAD ANTES QUE DECORACIÓN', 'MOVIMIENTO QUE EXPLICA', 'DETALLES QUE SE SIENTEN HUMANOS'].map((texto, indice) => (
+          <View key={texto} style={styles.manifiestoItem}>
+            <Text style={styles.manifiestoNumero}>0{indice + 1}</Text>
+            <Text style={styles.manifiestoTexto}>{texto}</Text>
+            <Text style={styles.manifiestoFlecha}>↗</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  </View>
+);
 
 export default function App() {
-  const [repositorios, setRepositorios] = useState([]);
+  const [repositorios, setRepositorios] = useState(repositoriosBase);
   const [cargando, setCargando] = useState(true);
-  const [errorRepositorios, setErrorRepositorios] = useState(false);
-  const opacidadPulso = useRef(new AnimatedNative.Value(0.4)).current;
-  const reveladoTitulo = useRef(new AnimatedNative.Value(0)).current;
-  const movimientoSello = useRef(new AnimatedNative.Value(0)).current;
-  const listaRef = useRef(null);
+  const scrollRef = useRef(null);
   const posicionProyectos = useRef(0);
   const { width } = useWindowDimensions();
-  const esEscritorio = width >= 900;
-  const esMovil = width < 720;
-  const reducirMovimiento = useReducedMotion();
+  const movil = width < 720;
+  const escritorio = width >= 980;
 
   useEffect(() => {
-    let componenteActivo = true;
-
-    const obtenerRepositorios = async () => {
-      try {
-        const respuesta = await fetch(
-          `https://api.github.com/users/${GITHUB_USUARIO}/repos?sort=updated&per_page=100`
-        );
-
-        if (!respuesta.ok) throw new Error('No se pudieron cargar los repositorios');
-
-        const datos = await respuesta.json();
-        if (componenteActivo && Array.isArray(datos)) {
-          setRepositorios(
-            seleccionarProyectos(datos.filter((repo) => !repo.fork && !repo.archived))
-          );
+    let activo = true;
+    fetch(`https://api.github.com/users/${GITHUB_USUARIO}/repos?sort=updated&per_page=100`)
+      .then((respuesta) => {
+        if (!respuesta.ok) throw new Error('GitHub no disponible');
+        return respuesta.json();
+      })
+      .then((datos) => {
+        const seleccion = seleccionarProyectos(datos.filter((repo) => !repo.fork && !repo.archived));
+        if (activo && seleccion.length) {
+          const remotos = new Map(seleccion.map((repo) => [repo.name.toLowerCase(), repo]));
+          setRepositorios(repositoriosBase.map((repo) => remotos.get(repo.name.toLowerCase()) || repo));
         }
-      } catch (error) {
-        if (componenteActivo) setErrorRepositorios(true);
-        console.error(error);
-      } finally {
-        if (componenteActivo) setCargando(false);
-      }
-    };
-
-    obtenerRepositorios();
-    return () => {
-      componenteActivo = false;
-    };
+      })
+      .catch(() => {})
+      .finally(() => { if (activo) setCargando(false); });
+    return () => { activo = false; };
   }, []);
 
   useEffect(() => {
-    const animacionPulso = AnimatedNative.loop(
-      AnimatedNative.sequence([
-        AnimatedNative.timing(opacidadPulso, {
-          toValue: 1,
-          duration: 1800,
-          useNativeDriver: true,
-        }),
-        AnimatedNative.timing(opacidadPulso, {
-          toValue: 0.4,
-          duration: 1800,
-          useNativeDriver: true,
-        }),
-      ])
-    );
-
-    if (reducirMovimiento) {
-      opacidadPulso.setValue(1);
-    } else {
-      animacionPulso.start();
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    document.body.style.margin = '0';
+    document.body.style.backgroundColor = HIELO;
+    let enlace = document.getElementById('portfolio-fonts');
+    if (!enlace) {
+      enlace = document.createElement('link');
+      enlace.id = 'portfolio-fonts';
+      enlace.rel = 'stylesheet';
+      document.head.appendChild(enlace);
     }
+    enlace.href = 'https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap';
+  }, []);
 
-    if (typeof document !== 'undefined') {
-      document.body.style.backgroundColor = '#eef7fa';
-      document.body.style.margin = '0';
-
-      if (!document.getElementById('portfolio-fonts')) {
-        const enlaceFuentes = document.createElement('link');
-        enlaceFuentes.id = 'portfolio-fonts';
-        enlaceFuentes.rel = 'stylesheet';
-        enlaceFuentes.href = 'https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap';
-        document.head.appendChild(enlaceFuentes);
-      } else {
-        document.getElementById('portfolio-fonts').href = 'https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap';
-      }
-    }
-
-    return () => animacionPulso.stop();
-  }, [opacidadPulso, reducirMovimiento]);
-
-  useEffect(() => {
-    if (reducirMovimiento) {
-      reveladoTitulo.setValue(1);
-      movimientoSello.setValue(0.5);
-      return undefined;
-    }
-
-    reveladoTitulo.setValue(0);
-    movimientoSello.setValue(0);
-
-    const animacionTitulo = AnimatedNative.sequence([
-      AnimatedNative.delay(220),
-      AnimatedNative.timing(reveladoTitulo, {
-        toValue: 1,
-        duration: 720,
-        easing: Easing.inOut(Easing.cubic),
-        useNativeDriver: true,
-      }),
-    ]);
-
-    const animacionSello = AnimatedNative.loop(
-      AnimatedNative.sequence([
-        AnimatedNative.timing(movimientoSello, {
-          toValue: 1,
-          duration: 2300,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-        AnimatedNative.timing(movimientoSello, {
-          toValue: 0,
-          duration: 2300,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-      ])
-    );
-
-    animacionTitulo.start();
-    animacionSello.start();
-
-    return () => {
-      animacionTitulo.stop();
-      animacionSello.stop();
-    };
-  }, [movimientoSello, reducirMovimiento, reveladoTitulo]);
-
-  const desplazamientoCortina = reveladoTitulo.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, Math.max(width, 720)],
-  });
-  const rotacionSello = movimientoSello.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['7deg', '11deg'],
-  });
-
-  const irAProyectos = () => {
-    listaRef.current?.scrollTo({ y: posicionProyectos.current, animated: true });
-  };
-
-  const formatoProyecto = (index) => {
-    if (width < 720) return { ancho: '100%', destacado: false };
-    if (width < 1100) return { ancho: '48.5%', destacado: false };
-    if (index === 0 || index === 3) return { ancho: '63.8%', destacado: true };
-    if (index === 1 || index === 2) return { ancho: '34%', destacado: false };
-    return { ancho: '48.8%', destacado: false };
-  };
-
-  const renderizarCabecera = () => (
-    <View style={[estilos.cabeceraContenedor, esMovil && estilos.cabeceraContenedorMovil]}>
-      <View style={[estilos.barraNavegacion, esMovil && estilos.barraNavegacionMovil]}>
-        <View>
-          <Text style={estilos.marca}>AS / PORTFOLIO</Text>
-          <Text style={estilos.numeroEdicion}>ISSUE 001 · 2026</Text>
-        </View>
-        {esEscritorio && (
-          <View style={estilos.enlacesNavegacion}>
-            <Text style={[estilos.enlaceNavegacion, estilos.enlaceNavegacionActivo]}>01 INICIO</Text>
-            <Pressable onPress={irAProyectos} accessibilityRole="link">
-              <Text style={estilos.enlaceNavegacion}>02 PROYECTOS</Text>
-            </Pressable>
-          </View>
-        )}
-        <BotonAnimado
-          style={estilos.botonNavegacion}
-          onPress={() => Linking.openURL(`mailto:${CORREO}`)}
-          accessibilityLabel="Contactar a Anderson"
-        >
-          <Text style={estilos.textoBotonNavegacion}>CONTACTO ↗</Text>
-        </BotonAnimado>
-      </View>
-
-      <View style={[estilos.hero, esEscritorio && estilos.heroEscritorio, esMovil && estilos.heroMovil]}>
-        <AnimatedReanimated.View
-          entering={FadeInDown.duration(700)}
-          style={[
-            estilos.heroContenido,
-            esEscritorio && estilos.heroContenidoEscritorio,
-            esMovil && estilos.heroContenidoMovil,
-          ]}
-        >
-          <View style={estilos.filaEditorialSuperior}>
-            <Text style={estilos.textoEditorialSuperior}>CREATIVE DEVELOPMENT / COSTA RICA</Text>
-            <Text style={estilos.textoEditorialSuperior}>VOL. 01</Text>
-          </View>
-
-          <View style={estilos.contenedorEstado}>
-            <AnimatedNative.View style={[estilos.puntoEstado, { opacity: opacidadPulso }]} />
-            <Text style={estilos.textoEstado}>DISPONIBLE PARA OPORTUNIDADES</Text>
-          </View>
-
-          <Text style={estilos.saludo}>ANDERSON SOLANO CHAVARRÍA PRESENTA</Text>
-          <View style={estilos.contenedorTituloRevelado}>
-            <Text
-              accessible={false}
-              accessibilityElementsHidden
-              importantForAccessibility="no-hide-descendants"
-              style={[
-                estilos.tituloHero,
-                esEscritorio && estilos.tituloHeroEscritorio,
-                estilos.tituloRegistroDesplazado,
-              ]}
-            >
-              FRONT/{`\n`}END
-            </Text>
-            <Text
-              accessibilityRole="header"
-              style={[
-                estilos.tituloHero,
-                esEscritorio && estilos.tituloHeroEscritorio,
-                estilos.tituloHeroPrincipal,
-              ]}
-            >
-              FRONT<Text style={estilos.textoAcento}>/</Text>{`\n`}END
-            </Text>
-            <AnimatedNative.View
-              pointerEvents="none"
-              style={[
-                estilos.cortinaTinta,
-                { transform: [{ translateX: desplazamientoCortina }] },
-              ]}
-            />
-          </View>
-          <View style={estilos.subtituloManga}>
-            <Text style={estilos.textoIndiceHero}>EDICIÓN / 01</Text>
-            <Text style={estilos.textoEspecialidad}>DESARROLLADOR ESPECIALIZADO EN FRONTEND</Text>
-          </View>
-          <Text style={estilos.descripcionHero}>
-            Construyo interfaces web y móviles con una dirección visual fuerte, código claro y atención a cada detalle.
-          </Text>
-
-          <View style={estilos.filaAcciones}>
-            <BotonAnimado style={estilos.botonPrincipal} onPress={irAProyectos} accessibilityLabel="Ver proyectos">
-              <Text style={estilos.textoBotonPrincipal}>LEER PROYECTOS</Text>
-              <Ionicons name="arrow-forward" size={17} color="#f5fbfd" />
-            </BotonAnimado>
-            <BotonAnimado
-              style={estilos.botonSecundario}
-              onPress={() => Linking.openURL(`mailto:${CORREO}`)}
-              accessibilityLabel="Contactarme por correo"
-            >
-              <Text style={estilos.textoBotonSecundario}>ESCRIBIRME</Text>
-            </BotonAnimado>
-          </View>
-
-          <View style={estilos.filaSocial}>
-            <BotonAnimado
-              style={estilos.botonSocial}
-              onPress={() => Linking.openURL(`https://github.com/${GITHUB_USUARIO}`)}
-              accessibilityLabel="Abrir perfil de GitHub"
-            >
-              <FontAwesome5 name="github" size={17} color="#111111" />
-            </BotonAnimado>
-            <BotonAnimado
-              style={estilos.botonSocial}
-              onPress={() => Linking.openURL(LINKEDIN)}
-              accessibilityLabel="Abrir perfil de LinkedIn"
-            >
-              <FontAwesome5 name="linkedin" size={17} color="#111111" />
-            </BotonAnimado>
-            <Text style={estilos.textoSocial}>GITHUB / LINKEDIN / CR</Text>
-          </View>
-        </AnimatedReanimated.View>
-
-        <AnimatedReanimated.View
-          entering={FadeIn.delay(250).duration(900)}
-          style={[
-            estilos.heroVisual,
-            esEscritorio && estilos.heroVisualEscritorio,
-            esMovil && estilos.heroVisualMovil,
-          ]}
-        >
-          <MarcasCorte style={estilos.marcasCorteHero} />
-          <TramaPuntos style={estilos.tramaHero} />
-          <View style={estilos.panelRetratoManga}>
-            <View style={estilos.cabeceraPanelManga}>
-              <Text style={estilos.textoCabeceraPanel}>CAPÍTULO 01</Text>
-              <Text style={estilos.textoCabeceraPanel}>RETRATO DEL AUTOR</Text>
-            </View>
-            <Image
-              source={require('../assets/icon.png')}
-              style={estilos.imagenRetratoManga}
-              resizeMode="cover"
-              accessibilityLabel="Ilustración de Anderson Solano"
-            />
-            <View style={estilos.piePanelManga}>
-              <Text style={estilos.textoPiePanelManga}>CREAR TAMBIÉN ES CONTAR UNA HISTORIA.</Text>
-            </View>
-          </View>
-          <View style={estilos.panelRetratoSecundario}>
-            <Image
-              source={{ uri: `https://github.com/${GITHUB_USUARIO}.png` }}
-              style={estilos.fotoPerfilSecundaria}
-              accessibilityLabel="Fotografía de Anderson Solano"
-            />
-            <Text style={estilos.textoPanelSecundario}>AUTOR / DEV</Text>
-          </View>
-          <AnimatedNative.View style={[estilos.selloDisponible, { transform: [{ rotate: rotacionSello }] }]}>
-            <Text style={estilos.textoSelloDisponible}>DISPONIBLE</Text>
-            <Text style={estilos.textoSelloNumero}>2026</Text>
-          </AnimatedNative.View>
-          <Text style={[estilos.textoVerticalHero, esMovil && estilos.textoVerticalHeroMovil]}>DISEÑO / CÓDIGO / HISTORIA</Text>
-          <View style={estilos.barrasHero}><CodigoBarras /></View>
-          <Text style={estilos.folioHero}>PÁG. 01 / 03 · REG. ICE–79</Text>
-        </AnimatedReanimated.View>
-      </View>
-
-      <View style={estilos.contenedorHabilidades}>
-        <Text style={estilos.textoCintaHabilidades}>REACT NATIVE ◆ JAVASCRIPT ◆ PYTHON ◆ GIT ◆ HTML ◆ CSS ◆ UI SYSTEMS ◆</Text>
-      </View>
-
-      <View
-        style={[
-          estilos.contenedorTituloSeccion,
-          esMovil && estilos.contenedorTituloSeccionMovil,
-        ]}
-        onLayout={(evento) => {
-          posicionProyectos.current = evento.nativeEvent.layout.y;
-        }}
-      >
-        <View>
-          <Text style={estilos.etiquetaSeccion}>CAPÍTULO 02 / TRABAJO SELECCIONADO</Text>
-          <Text style={[estilos.tituloSeccionProyectos, esMovil && estilos.tituloSeccionProyectosMovil]}>ARCHIVO DE PROYECTOS</Text>
-        </View>
-        <Text style={[estilos.numeroSeccionGrande, esMovil && estilos.numeroSeccionGrandeMovil]}>02</Text>
-      </View>
-    </View>
-  );
-
-  const renderizarListaVacia = () => (
-    <View style={estilos.estadoProyectos}>
-      {cargando ? (
-        <>
-          <ActivityIndicator color={COLOR_MORADO} size="small" />
-          <Text style={estilos.textoEstadoProyectos}>Cargando proyectos…</Text>
-        </>
-      ) : (
-        <>
-          <MaterialCommunityIcons
-            name={errorRepositorios ? 'cloud-alert-outline' : 'folder-open-outline'}
-            size={32}
-            color={COLOR_MORADO}
-          />
-          <Text style={estilos.textoEstadoProyectos}>
-            {errorRepositorios
-              ? 'No fue posible cargar los proyectos en este momento.'
-              : 'Pronto habrá nuevos proyectos por aquí.'}
-          </Text>
-          <BotonAnimado
-            style={estilos.botonEstadoProyectos}
-            onPress={() => Linking.openURL(`https://github.com/${GITHUB_USUARIO}`)}
-            accessibilityLabel="Abrir GitHub"
-          >
-            <Text style={estilos.textoBotonEstado}>Visitar GitHub</Text>
-          </BotonAnimado>
-        </>
-      )}
-    </View>
-  );
-
-  const renderizarPie = () => (
-    <View style={[estilos.pieContenedor, esMovil && estilos.pieContenedorMovil]}>
-      <View style={[estilos.sobreMi, esEscritorio && estilos.sobreMiEscritorio, esMovil && estilos.sobreMiMovil]}>
-        <View style={[estilos.columnaNumeroSobreMi, esMovil && estilos.columnaNumeroSobreMiMovil]}>
-          <Text style={estilos.numeroSobreMi}>/</Text>
-          <Text style={estilos.textoVerticalSobreMi}>FIRMA DEL AUTOR</Text>
-        </View>
-        <View style={estilos.sobreMiTexto}>
-          <Text style={estilos.etiquetaSeccion}>MANIFIESTO / SOBRE MÍ</Text>
-          <Text style={estilos.tituloSobreMi}>No diseño para llenar pantallas.</Text>
-        </View>
-        <View style={estilos.columnaDescripcionSobreMi}>
-          <Text style={estilos.descripcionSobreMi}>
-            Construyo interfaces que se sienten pensadas, no ensambladas. Me interesa el punto donde diseño y código dejan de sentirse separados: una jerarquía clara, un gesto inesperado y ninguna decisión sin motivo.
-          </Text>
-          <View style={estilos.fichaAutor}>
-            <Text style={estilos.textoFichaAutor}>BASE</Text><Text style={estilos.valorFichaAutor}>COSTA RICA</Text>
-            <Text style={estilos.textoFichaAutor}>ENFOQUE</Text><Text style={estilos.valorFichaAutor}>FRONTEND</Text>
-            <Text style={estilos.textoFichaAutor}>HERRAMIENTAS</Text><Text style={estilos.valorFichaAutor}>REACT / JS</Text>
-          </View>
-          <View pointerEvents="none" style={estilos.firmaPersonal}>
-            <Text style={estilos.slashFirmaPersonal}>/</Text>
-            <Text style={estilos.textoFirmaPersonal}>ANDERSON SOLANO · FRONTEND</Text>
-          </View>
-        </View>
-      </View>
-
-      <View style={[
-        estilos.tarjetaContacto,
-        esEscritorio && estilos.tarjetaContactoEscritorio,
-        esMovil && estilos.tarjetaContactoMovil,
-      ]}>
-        <Text style={estilos.textoFondoContacto}>CONTACTO</Text>
-        <View style={estilos.contactoTexto}>
-          <Text style={estilos.etiquetaContacto}>ÚLTIMA PÁGINA / CONTINÚA…</Text>
-          <Text style={estilos.tituloContacto}>¿Cuál será la próxima historia?</Text>
-          <Text style={estilos.descripcionContacto}>Disponible para colaborar en proyectos web y móviles con una identidad propia.</Text>
-        </View>
-        <BotonAnimado
-          style={estilos.botonContacto}
-          onPress={() => Linking.openURL(`mailto:${CORREO}`)}
-          accessibilityLabel="Enviar correo a Anderson"
-        >
-          <Text style={estilos.textoBotonContacto}>INICIAR CONVERSACIÓN</Text>
-          <Ionicons name="arrow-forward" size={18} color="#111111" />
-        </BotonAnimado>
-      </View>
-
-      <View style={estilos.filaCopyright}>
-        <Text style={estilos.textoCopyright}>© 2026 Anderson Solano Chavarría</Text>
-        <Text style={estilos.textoCopyright}>REG. 001 · CYAN OFFSET +03</Text>
-        <Text style={estilos.textoCopyright}>EDICIÓN 001 / HECHO CON REACT NATIVE</Text>
-      </View>
-    </View>
-  );
+  const irAProyectos = () => scrollRef.current?.scrollTo({ y: posicionProyectos.current, animated: true });
 
   return (
-    <View style={estilos.cuerpo}>
-      <FondoEditorial />
-      <ScrollView
-        ref={listaRef}
-        contentContainerStyle={estilos.contenedorLista}
-        showsVerticalScrollIndicator={false}
-      >
-        {renderizarCabecera()}
-        {repositorios.length === 0 ? (
-          renderizarListaVacia()
-        ) : (
-          <View style={[estilos.rejillaProyectos, esMovil && estilos.rejillaProyectosMovil]}>
-            {repositorios.map((item, index) => {
-              const formato = formatoProyecto(index);
-              return (
-                <React.Fragment key={item.id}>
-                  <TarjetaProyecto
-                    item={item}
-                    index={index}
-                    ancho={formato.ancho}
-                    destacado={formato.destacado}
-                    esMovil={esMovil}
-                  />
-                  {esMovil && index === 1 && (
-                    <SeparadorLecturaMovil pagina="04" texto="SIGUIENTE CAPÍTULO" />
-                  )}
-                  {esMovil && index === 3 && (
-                    <SeparadorLecturaMovil pagina="06" texto="CONTINÚA…" />
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </View>
-        )}
-        {renderizarPie()}
-      </ScrollView>
+    <View style={styles.pagina}>
       <StatusBar style="dark" />
+      <DecoracionFondo />
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <View style={[styles.cabeceraWrap, movil && styles.paddingMovil]}>
+          <View style={styles.nav}>
+            <View>
+              <Text style={styles.logo}>AS<Text style={styles.logoSlash}>//</Text></Text>
+              <Text style={styles.logoSub}>ANDERSON SOLANO</Text>
+            </View>
+            {!movil && (
+              <View style={styles.navLinks}>
+                <Pressable onPress={irAProyectos}><Text style={styles.navLink}>TRABAJO</Text></Pressable>
+                <Pressable onPress={() => scrollRef.current?.scrollToEnd({ animated: true })}><Text style={styles.navLink}>SOBRE MÍ</Text></Pressable>
+              </View>
+            )}
+            <Pressable onPress={() => Linking.openURL(`mailto:${CORREO}`)} style={styles.navContacto} accessibilityLabel="Escribir a Anderson">
+              <Text style={styles.navContactoTexto}>CONTACTO ↗</Text>
+            </Pressable>
+          </View>
+
+          <View style={[styles.hero, !escritorio && styles.heroColumna]}>
+            <Reanimated.View entering={FadeIn.duration(550)} style={styles.heroTexto}>
+              <View style={styles.heroMeta}>
+                <Text style={styles.heroMetaTexto}>ESPECIALIZADO EN FRONTEND</Text>
+                <Text style={styles.heroMetaTexto}>COSTA RICA / 2026</Text>
+              </View>
+              <View style={styles.heroTituloWrap}>
+                <Text style={[styles.heroTituloSombra, movil && styles.heroTituloMovil]}>HAGO WEBS</Text>
+                <Text style={[styles.heroTitulo, movil && styles.heroTituloMovil]}>HAGO WEBS</Text>
+                <Text style={[styles.heroTituloAzul, movil && styles.heroTituloMovil]}>CON ALGO</Text>
+                <Text style={[styles.heroTitulo, movil && styles.heroTituloMovil]}>QUE DECIR.</Text>
+                <View style={styles.heroTituloSticker}><Text style={styles.heroTituloStickerTexto}>Y2K{`\n`}FRONTEND</Text></View>
+              </View>
+              <View style={styles.heroIntro}>
+                <Text style={styles.heroIntroTexto}>Desarrollo interfaces web y móviles con código claro, decisiones visuales fuertes y suficiente personalidad para que nadie las confunda con una plantilla.</Text>
+                <Text style={styles.heroIntroNota}>sin relleno{`\n`}sin “se ve bonito y ya”</Text>
+              </View>
+              <View style={styles.heroAcciones}>
+                <Boton azul onPress={irAProyectos} label="Ver proyectos" icono={<Ionicons name="arrow-down" size={14} color={HIELO} />}>VER LO QUE HAGO</Boton>
+                <Boton onPress={() => Linking.openURL(`mailto:${CORREO}`)} label="Escribir a Anderson">ESCRIBIRME</Boton>
+              </View>
+              <View style={styles.heroNumeros}>
+                <View style={styles.heroNumero}><Text style={styles.heroNumeroValor}>04</Text><Text style={styles.heroNumeroTexto}>PROYECTOS{`\n`}SELECCIONADOS</Text></View>
+                <View style={styles.heroNumero}><Text style={styles.heroNumeroValor}>UI</Text><Text style={styles.heroNumeroTexto}>DISEÑO +{`\n`}DESARROLLO</Text></View>
+                <View style={styles.heroNumero}><Text style={styles.heroNumeroValor}>CR</Text><Text style={styles.heroNumeroTexto}>DISPONIBLE{`\n`}PARA TRABAJAR</Text></View>
+              </View>
+            </Reanimated.View>
+            <Reanimated.View entering={FadeInDown.delay(120).duration(650)} style={styles.heroCollageWrap}>
+              <HeroCollage movil={!escritorio} />
+            </Reanimated.View>
+          </View>
+        </View>
+
+        <View style={styles.marquesina}>
+          <Text style={styles.marquesinaTexto}>REACT  ✦  REACT NATIVE  ✦  JAVASCRIPT  ✦  EXPO  ✦  INTERFACES CON CARÁCTER  ✦  NO TEMPLATES  ✦  REACT  ✦  REACT NATIVE  ✦  JAVASCRIPT</Text>
+        </View>
+
+        <View
+          style={[styles.proyectos, movil && styles.paddingMovil]}
+          onLayout={(evento) => { posicionProyectos.current = evento.nativeEvent.layout.y; }}
+        >
+          <View style={[styles.proyectosCabecera, movil && styles.proyectosCabeceraMovil]}>
+            <View>
+              <Text style={styles.seccionSobrelinea}>COSAS QUE HICE Y POR QUÉ IMPORTAN</Text>
+              <Text style={[styles.seccionTitulo, movil && styles.seccionTituloMovil]}>NO SOLO{`\n`}REPOS.</Text>
+            </View>
+            <View style={styles.proyectosNota}>
+              <Text style={styles.proyectosNotaTexto}>cada proyecto tiene{`\n`}una lógica, una pelea{`\n`}y una decisión visual.</Text>
+              <Text style={styles.proyectosNotaFlecha}>↓</Text>
+            </View>
+          </View>
+
+          <View style={styles.listaProyectos}>
+            {repositorios.slice(0, 2).map((item, indice) => <Proyecto key={item.id || item.name} item={item} indice={indice} movil={!escritorio} />)}
+            <InterludioPersonal escritorio={escritorio} movil={movil} />
+            <View style={styles.interrupcionEditorial}>
+              <Text style={styles.interrupcionEditorialGrande}>DOS MÁS.</Text>
+              <Text style={styles.interrupcionEditorialNota}>mismo desarrollador,{`\n`}otra lógica visual ↓</Text>
+              <Estrella style={styles.interrupcionEditorialEstrella} />
+            </View>
+            {repositorios.slice(2).map((item, indice) => <Proyecto key={item.id || item.name} item={item} indice={indice + 2} movil={!escritorio} />)}
+          </View>
+          {cargando && <ActivityIndicator color={AZUL} size="small" style={styles.cargando} />}
+        </View>
+
+        <View style={[styles.contacto, movil && styles.contactoMovil]}>
+          <Trama clara style={styles.contactoTrama} />
+          <Text style={styles.contactoMicro}>OPEN FOR WORK / AND STRANGE IDEAS</Text>
+          <Text style={[styles.contactoTitulo, movil && styles.contactoTituloMovil]}>¿TIENES UNA{`\n`}IDEA RARA?</Text>
+          <Text style={styles.contactoNota}>mejor todavía.</Text>
+          <View style={[styles.contactoBotones, movil && styles.contactoBotonesMovil]}>
+            <Boton claro onPress={() => Linking.openURL(`mailto:${CORREO}`)} label="Enviar correo" icono={<Ionicons name="arrow-forward" size={15} color={NEGRO} />}>HABLEMOS</Boton>
+            <Text style={styles.contactoCorreo}>{CORREO}</Text>
+          </View>
+          <Estrella clara style={styles.contactoEstrella} />
+        </View>
+
+        <View style={styles.footer}>
+          <Text style={styles.footerTexto}>© 2026 / ANDERSON SOLANO / COSTA RICA</Text>
+          <View style={styles.footerLinks}>
+            <Pressable onPress={() => Linking.openURL(`https://github.com/${GITHUB_USUARIO}`)}><Text style={styles.footerLink}>GITHUB ↗</Text></Pressable>
+            <Pressable onPress={() => Linking.openURL(LINKEDIN)}><Text style={styles.footerLink}>LINKEDIN ↗</Text></Pressable>
+          </View>
+        </View>
+      </ScrollView>
     </View>
   );
 }
 
-const estilos = StyleSheet.create({
-  cuerpo: { flex: 1, backgroundColor: '#eef7fa' },
-  contenedorLista: { paddingBottom: 36 },
-  lineaPapel: { position: 'absolute', left: 0, right: 0, height: 1, backgroundColor: '#171717' },
-  tramaPuntos: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, overflow: 'hidden' },
-  puntoTrama: { width: 2, height: 2, borderRadius: 1, backgroundColor: '#111111', opacity: 0.38 },
-  puntoTramaGrande: { width: 3, height: 3, opacity: 0.55 },
-  tramaFondoSuperior: { position: 'absolute', right: -20, top: 80, width: 130, height: 90, opacity: 0.18, transform: [{ rotate: '-8deg' }] },
-  tramaFondoInferior: { position: 'absolute', left: -20, top: 720, width: 150, height: 110, opacity: 0.12, transform: [{ rotate: '7deg' }] },
-  marcaRegistro: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center', opacity: 0.58 },
-  circuloRegistro: { position: 'absolute', width: 18, height: 18, borderRadius: 9, borderWidth: 1, borderColor: '#111111' },
-  lineaRegistroHorizontal: { position: 'absolute', width: 30, height: 1, backgroundColor: '#111111' },
-  lineaRegistroVertical: { position: 'absolute', width: 1, height: 30, backgroundColor: '#111111' },
-  puntoRegistro: { width: 3, height: 3, borderRadius: 2, backgroundColor: COLOR_MORADO },
-  registroFondoSuperior: { position: 'absolute', left: 14, top: 152, opacity: 0.22 },
-  registroFondoInferior: { position: 'absolute', right: 16, bottom: 24, opacity: 0.18 },
-  marcasCorte: { zIndex: 8 },
-  marcaCorteHorizontal: { position: 'absolute', width: 15, height: 1, backgroundColor: '#111111', opacity: 0.72 },
-  marcaCorteVertical: { position: 'absolute', width: 1, height: 15, backgroundColor: '#111111', opacity: 0.72 },
-  corteSuperiorIzquierdoH: { top: -6, left: -8 },
-  corteSuperiorIzquierdoV: { top: -8, left: -6 },
-  corteSuperiorDerechoH: { top: -6, right: -8 },
-  corteSuperiorDerechoV: { top: -8, right: -6 },
-  corteInferiorIzquierdoH: { bottom: -6, left: -8 },
-  corteInferiorIzquierdoV: { bottom: -8, left: -6 },
-  corteInferiorDerechoH: { right: -8, bottom: -6 },
-  corteInferiorDerechoV: { right: -6, bottom: -8 },
-  separadorLecturaMovil: { width: '100%', minHeight: 88, flexDirection: 'row', alignItems: 'center', gap: 11, marginVertical: 8 },
-  lineaSeparadorMovil: { flex: 1, height: 2, backgroundColor: '#111111' },
-  etiquetaSeparadorMovil: { minWidth: 136, alignItems: 'center', paddingHorizontal: 10, paddingVertical: 9, backgroundColor: '#111111', transform: [{ rotate: '-1deg' }] },
-  textoSeparadorMovil: { color: '#f5fbfd', fontFamily: FUENTE_TEXTO, fontSize: 7, fontWeight: '900', letterSpacing: 0.8 },
-  paginaSeparadorMovil: { color: COLOR_MORADO, fontFamily: FUENTE_TITULOS, fontSize: 19, lineHeight: 22, letterSpacing: 0.5 },
-  codigoBarras: { height: 38, flexDirection: 'row', alignItems: 'stretch', gap: 2 },
-  barraCodigo: { height: '100%', backgroundColor: '#111111' },
-  cabeceraContenedor: { width: '100%', maxWidth: 1220, alignSelf: 'center', paddingHorizontal: 24, paddingTop: 16, paddingBottom: 20 },
-  cabeceraContenedorMovil: { paddingHorizontal: 18, paddingTop: 10 },
-  barraNavegacion: { minHeight: 70, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 12, borderBottomWidth: 3, borderBottomColor: '#111111' },
-  barraNavegacionMovil: { minHeight: 58, paddingBottom: 9 },
-  marca: { color: '#111111', fontFamily: FUENTE_TITULOS, fontSize: 25, fontWeight: '900', letterSpacing: 0.5 },
-  numeroEdicion: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 8, fontWeight: '700', letterSpacing: 1.5, marginTop: 1 },
-  enlacesNavegacion: { flexDirection: 'row', alignItems: 'center', gap: 34 },
-  enlaceNavegacion: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 10, fontWeight: '700', letterSpacing: 0.8 },
-  enlaceNavegacionActivo: { textDecorationLine: 'underline' },
-  botonNavegacion: { minHeight: 40, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#111111', backgroundColor: '#111111' },
-  textoBotonNavegacion: { color: '#f5fbfd', fontFamily: FUENTE_TEXTO, fontSize: 10, fontWeight: '800', letterSpacing: 0.8 },
-  hero: { position: 'relative', paddingTop: 34, paddingBottom: 44, alignItems: 'center', gap: 34 },
-  heroEscritorio: { minHeight: 650, paddingTop: 42, paddingBottom: 48, flexDirection: 'row', justifyContent: 'space-between', gap: 46 },
-  heroMovil: { paddingTop: 24, paddingBottom: 34, gap: 18 },
-  heroContenido: { width: '100%', maxWidth: 650, alignItems: 'flex-start' },
-  heroContenidoEscritorio: { flex: 1 },
-  heroContenidoMovil: { maxWidth: '100%' },
-  filaEditorialSuperior: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: '#111111', marginBottom: 14 },
-  textoEditorialSuperior: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 8, fontWeight: '700', letterSpacing: 0.6 },
-  contenedorEstado: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5fbfd', paddingHorizontal: 10, paddingVertical: 6, borderWidth: 2, borderColor: '#111111' },
-  puntoEstado: { width: 7, height: 7, borderRadius: 4, backgroundColor: COLOR_MORADO, marginRight: 8 },
-  textoEstado: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 9, fontWeight: '800', letterSpacing: 0.4 },
-  saludo: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 9, fontWeight: '900', letterSpacing: 1.6, marginTop: 18 },
-  contenedorTituloRevelado: { width: '100%', position: 'relative', overflow: 'hidden' },
-  tituloHero: { color: '#111111', fontFamily: FUENTE_TITULOS, fontSize: 76, lineHeight: 69, fontWeight: '900', letterSpacing: -1, marginTop: 4 },
-  tituloHeroEscritorio: { fontSize: 126, lineHeight: 108, letterSpacing: -2 },
-  tituloHeroPrincipal: { position: 'relative', zIndex: 1 },
-  tituloRegistroDesplazado: { position: 'absolute', left: 4, top: 1, color: COLOR_MORADO, opacity: 0.78, zIndex: 0 },
-  cortinaTinta: { ...StyleSheet.absoluteFillObject, zIndex: 3, backgroundColor: '#111111', borderLeftWidth: 8, borderLeftColor: COLOR_MORADO },
-  textoAcento: { color: COLOR_MORADO },
-  subtituloManga: { width: '100%', flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 16, paddingVertical: 8, borderTopWidth: 2, borderBottomWidth: 2, borderColor: '#111111' },
-  textoIndiceHero: { color: '#f5fbfd', backgroundColor: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 9, fontWeight: '800', letterSpacing: 0.8, paddingHorizontal: 8, paddingVertical: 5 },
-  textoEspecialidad: { flex: 1, color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 9, fontWeight: '900', letterSpacing: 0.5 },
-  descripcionHero: { color: '#222222', fontFamily: FUENTE_TEXTO, fontSize: 13, lineHeight: 21, maxWidth: 560, marginTop: 18 },
-  filaAcciones: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginTop: 30 },
-  botonPrincipal: { minHeight: 48, backgroundColor: '#111111', paddingHorizontal: 20, minWidth: 170, flexDirection: 'row', gap: 8, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#111111' },
-  botonSecundario: { minHeight: 48, backgroundColor: 'transparent', paddingHorizontal: 20, minWidth: 142, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#111111' },
-  textoBotonPrincipal: { color: '#f5fbfd', fontFamily: FUENTE_TEXTO, fontSize: 10, fontWeight: '900', letterSpacing: 0.7 },
-  textoBotonSecundario: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 10, fontWeight: '900', letterSpacing: 0.7 },
-  filaSocial: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 30 },
-  botonSocial: { width: 36, height: 36, backgroundColor: 'transparent', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#111111' },
-  textoSocial: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 9, fontWeight: '700', marginLeft: 3, letterSpacing: 0.5 },
-  heroVisual: { width: '100%', maxWidth: 410, height: 510, alignItems: 'center', justifyContent: 'center' },
-  heroVisualEscritorio: { width: 490, maxWidth: 490, height: 570 },
-  heroVisualMovil: { height: 478, marginTop: 12 },
-  marcasCorteHero: { top: 22, right: 12, bottom: 18, left: 10, opacity: 0.8 },
-  tramaHero: { position: 'absolute', right: 0, top: 10, width: 190, height: 150, opacity: 0.65, transform: [{ rotate: '6deg' }] },
-  panelRetratoManga: { position: 'absolute', left: 20, top: 42, width: '78%', height: 430, backgroundColor: '#f8fcfd', borderWidth: 4, borderColor: '#111111', transform: [{ rotate: '-1.5deg' }] },
-  cabeceraPanelManga: { height: 34, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 9, backgroundColor: '#111111' },
-  textoCabeceraPanel: { color: '#f5fbfd', fontFamily: FUENTE_TEXTO, fontSize: 7, fontWeight: '800', letterSpacing: 0.5 },
-  imagenRetratoManga: { width: '100%', flex: 1, backgroundColor: '#ffffff', filter: Platform.OS === 'web' ? 'grayscale(1) contrast(1.45)' : undefined },
-  piePanelManga: { minHeight: 46, justifyContent: 'center', paddingHorizontal: 10, borderTopWidth: 3, borderTopColor: '#111111' },
-  textoPiePanelManga: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 8, lineHeight: 12, fontWeight: '900', letterSpacing: 0.3 },
-  panelRetratoSecundario: { position: 'absolute', right: 0, bottom: 30, width: 138, padding: 5, backgroundColor: '#f5fbfd', borderWidth: 3, borderColor: '#111111', transform: [{ rotate: '2.5deg' }] },
-  fotoPerfilSecundaria: { width: '100%', height: 94, filter: Platform.OS === 'web' ? 'grayscale(1) contrast(1.35)' : undefined },
-  textoPanelSecundario: { color: '#f5fbfd', backgroundColor: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 8, fontWeight: '900', letterSpacing: 0.7, paddingHorizontal: 6, paddingVertical: 5, marginTop: 4 },
-  selloDisponible: { position: 'absolute', right: 7, top: 88, width: 88, height: 88, borderRadius: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: COLOR_MORADO, borderWidth: 3, borderColor: '#111111', transform: [{ rotate: '9deg' }] },
-  textoSelloDisponible: { color: '#f5fbfd', fontFamily: FUENTE_TEXTO, fontSize: 8, fontWeight: '900', letterSpacing: 0.6 },
-  textoSelloNumero: { color: '#f5fbfd', fontFamily: FUENTE_TITULOS, fontSize: 22, marginTop: 1 },
-  textoVerticalHero: { position: 'absolute', right: -105, top: 248, width: 300, color: '#111111', fontFamily: FUENTE_TITULOS, fontSize: 18, letterSpacing: 2, transform: [{ rotate: '90deg' }] },
-  textoVerticalHeroMovil: { right: -116, top: 232, fontSize: 14, letterSpacing: 1.4 },
-  barrasHero: { position: 'absolute', left: 0, bottom: 0, width: 110, height: 38 },
-  folioHero: { position: 'absolute', right: 0, bottom: 1, color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 7, fontWeight: '900', letterSpacing: 0.8 },
-  contenedorHabilidades: { width: '112%', alignSelf: 'center', paddingVertical: 13, paddingHorizontal: 20, backgroundColor: '#111111', borderTopWidth: 3, borderBottomWidth: 3, borderColor: '#111111', transform: [{ rotate: '-1deg' }], overflow: 'hidden' },
-  textoCintaHabilidades: { color: '#f5fbfd', fontFamily: FUENTE_TITULOS, fontSize: 19, letterSpacing: 1.2, textAlign: 'center' },
-  contenedorTituloSeccion: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 78, marginBottom: 22, paddingBottom: 12, borderBottomWidth: 4, borderBottomColor: '#111111' },
-  contenedorTituloSeccionMovil: { marginTop: 58, marginBottom: 34, paddingBottom: 10, alignItems: 'flex-start' },
-  etiquetaSeccion: { color: COLOR_MORADO, fontFamily: FUENTE_TEXTO, fontSize: 9, fontWeight: '900', letterSpacing: 1 },
-  tituloSeccionProyectos: { color: '#111111', fontFamily: FUENTE_TITULOS, fontSize: 38, fontWeight: '900', letterSpacing: 0.3, marginTop: 4 },
-  tituloSeccionProyectosMovil: { maxWidth: 250, fontSize: 34, lineHeight: 38 },
-  numeroSeccionGrande: { color: '#111111', fontFamily: FUENTE_TITULOS, fontSize: 66, lineHeight: 66 },
-  numeroSeccionGrandeMovil: { position: 'absolute', right: 0, bottom: 8, color: COLOR_MORADO, fontSize: 54, lineHeight: 54, opacity: 0.78 },
-  rejillaProyectos: { width: '100%', maxWidth: 1220, alignSelf: 'center', paddingHorizontal: 24, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'stretch', gap: 20 },
-  rejillaProyectosMovil: { paddingHorizontal: 18, gap: 14 },
-  celdaProyecto: { minHeight: 430, position: 'relative' },
-  celdaProyectoMovil: { marginTop: 18, marginBottom: 18 },
-  folioProyectoMovil: { position: 'absolute', top: -19, zIndex: 10, color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 7, fontWeight: '900', letterSpacing: 0.7 },
-  folioProyectoMovilIzquierdo: { left: 1 },
-  folioProyectoMovilDerecho: { right: 1, textAlign: 'right' },
-  envolturaTarjetaProyecto: { flex: 1 },
-  sombraRegistroProyecto: { position: 'absolute', top: 6, right: -6, bottom: -6, left: 6, backgroundColor: COLOR_MORADO, borderWidth: 3, borderColor: '#111111' },
-  tarjetaProyecto: { flex: 1, minHeight: 430, backgroundColor: '#f7fbfd', overflow: 'hidden', borderWidth: 3, borderColor: '#111111' },
-  tarjetaProyectoAlterna: { backgroundColor: '#dfecef' },
-  cabeceraFichaProyecto: { height: 34, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 10, backgroundColor: '#111111' },
-  textoFichaProyecto: { color: '#f5fbfd', fontFamily: FUENTE_TEXTO, fontSize: 7, fontWeight: '800', letterSpacing: 0.7 },
-  interiorProyecto: { flex: 1 },
-  interiorProyectoDestacado: { flexDirection: 'row' },
-  contenedorImagenProyecto: { height: 200, backgroundColor: '#d9e8ed', overflow: 'hidden', borderBottomWidth: 3, borderBottomColor: '#111111' },
-  contenedorImagenProyectoDestacado: { width: '55%', height: '100%', borderBottomWidth: 0, borderRightWidth: 3, borderRightColor: '#111111' },
-  contenedorImagenProyectoDestacadoSiwo: { width: '62%' },
-  portadaRepositorio: { flex: 1, position: 'relative', overflow: 'hidden', padding: 17, backgroundColor: '#f8fcfd' },
-  portadaRepositorioConCaptura: { padding: 0, alignItems: 'stretch', justifyContent: 'flex-start', backgroundColor: '#f8fcfd' },
-  portadaRepositorioGris: { backgroundColor: '#dce9ed' },
-  portadaRepositorioRoja: { backgroundColor: '#d6edf4' },
-  laminaCapturaProyecto: { width: '100%', aspectRatio: 1264 / 771, overflow: 'hidden', backgroundColor: '#f8fcfd', borderBottomWidth: 3, borderBottomColor: COLOR_MORADO },
-  capturaProyectoCompleta: { width: '100%', height: '100%', filter: Platform.OS === 'web' ? 'saturate(0.9) contrast(1.03)' : undefined },
-  veloCapturaProyecto: { ...StyleSheet.absoluteFillObject, backgroundColor: 'transparent', borderWidth: 6, borderColor: 'rgba(248,252,253,0.7)' },
-  fichaCapturaProyecto: { position: 'absolute', left: 12, bottom: 12, minWidth: 154, paddingHorizontal: 10, paddingVertical: 7, backgroundColor: 'rgba(17,17,17,0.92)', borderLeftWidth: 5, borderLeftColor: COLOR_MORADO },
-  fichaCapturaProyectoDestacada: { position: 'absolute', left: 18, bottom: 20, width: 176, paddingHorizontal: 10, paddingVertical: 7, backgroundColor: '#111111', borderLeftWidth: 5, borderLeftColor: COLOR_MORADO },
-  etiquetaCapturaProyecto: { color: '#b9cdd4', fontFamily: FUENTE_TEXTO, fontSize: 6, fontWeight: '900', letterSpacing: 0.6 },
-  nombreCapturaProyecto: { color: '#f5fbfd', fontFamily: FUENTE_TITULOS, fontSize: 22, lineHeight: 25, letterSpacing: 0.5 },
-  rutaRepositorio: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 7, fontWeight: '900', letterSpacing: 0.7 },
-  nombrePortadaRepositorio: { maxWidth: '78%', color: '#111111', fontFamily: FUENTE_TITULOS, fontSize: 30, lineHeight: 33, textTransform: 'uppercase', marginTop: 13 },
-  nombrePortadaRepositorioDestacada: { maxWidth: '84%', fontSize: 46, lineHeight: 49, marginTop: 22 },
-  nombrePortadaRepositorioLargo: { fontSize: 25, lineHeight: 28 },
-  metricasPortada: { position: 'absolute', left: 17, bottom: 15, flexDirection: 'row', gap: 22 },
-  valorMetrica: { color: '#111111', fontFamily: FUENTE_TITULOS, fontSize: 17, lineHeight: 18 },
-  etiquetaMetrica: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 6, fontWeight: '800', letterSpacing: 0.5, marginTop: 2 },
-  retratoPortadaProyecto: { position: 'absolute', right: -7, bottom: -10, width: 82, height: 82, opacity: 0.9, filter: Platform.OS === 'web' ? 'grayscale(1) contrast(1.5)' : undefined },
-  retratoPortadaProyectoDestacado: { width: 122, height: 122 },
-  lineaEditorialProyecto: { position: 'absolute', right: 29, top: -34, width: 3, height: 150, backgroundColor: '#111111', transform: [{ rotate: '28deg' }] },
-  tramaImagenProyecto: { position: 'absolute', right: -8, bottom: -8, width: 82, height: 72, opacity: 0.34 },
-  numeroProyecto: { position: 'absolute', top: 10, right: 10, minWidth: 48, height: 42, alignItems: 'center', justifyContent: 'center', backgroundColor: COLOR_MORADO, borderWidth: 2, borderColor: '#111111' },
-  textoNumeroProyectoDesregistro: { position: 'absolute', color: '#111111', opacity: 0.3, fontFamily: FUENTE_TITULOS, fontSize: 23, transform: [{ translateX: 2 }, { translateY: 1 }] },
-  textoNumeroProyecto: { color: '#f5fbfd', fontFamily: FUENTE_TITULOS, fontSize: 23 },
-  registroPortadaProyecto: { position: 'absolute', right: 62, bottom: 18, opacity: 0.36, transform: [{ scale: 0.72 }] },
-  cuerpoTarjetaProyecto: { flex: 1, minWidth: 0, padding: 18 },
-  cuerpoTarjetaProyectoMovil: { padding: 16 },
-  filaMetaProyecto: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  pillLenguaje: { backgroundColor: '#111111', paddingHorizontal: 8, paddingVertical: 5 },
-  textoLenguaje: { color: '#f5fbfd', fontFamily: FUENTE_TEXTO, fontSize: 8, fontWeight: '800', letterSpacing: 0.5 },
-  estrellasRepositorio: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  textoEstrellas: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 9, fontWeight: '800' },
-  tituloTarjeta: { color: '#111111', fontFamily: FUENTE_TITULOS, fontSize: 28, lineHeight: 31, textTransform: 'uppercase', marginTop: 16 },
-  tituloTarjetaDestacada: { fontSize: 33, lineHeight: 36 },
-  tituloTarjetaLarga: { fontSize: 23, lineHeight: 27 },
-  descripcionTarjeta: { color: '#202020', fontFamily: FUENTE_TEXTO, fontSize: 11, marginTop: 10, lineHeight: 18 },
-  accionesProyecto: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginTop: 'auto', paddingTop: 22 },
-  botonProyecto: { minHeight: 38, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingHorizontal: 11, backgroundColor: 'transparent', borderWidth: 2, borderColor: '#111111' },
-  botonProyectoPrincipal: { backgroundColor: '#111111', borderColor: '#111111' },
-  textoBotonProyecto: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 8, fontWeight: '900', letterSpacing: 0.4 },
-  textoBotonProyectoPrincipal: { color: '#f5fbfd', fontFamily: FUENTE_TEXTO, fontSize: 8, fontWeight: '900', letterSpacing: 0.4 },
-  estadoProyectos: { width: '100%', maxWidth: 1172, alignSelf: 'center', alignItems: 'center', justifyContent: 'center', minHeight: 230, padding: 24, marginBottom: 30, borderWidth: 3, borderColor: '#111111', backgroundColor: '#f7fbfd' },
-  textoEstadoProyectos: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 11, marginTop: 12, textAlign: 'center' },
-  botonEstadoProyectos: { marginTop: 18, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: '#111111' },
-  textoBotonEstado: { color: '#f5fbfd', fontFamily: FUENTE_TEXTO, fontSize: 10, fontWeight: '800' },
-  pieContenedor: { width: '100%', maxWidth: 1220, alignSelf: 'center', paddingHorizontal: 24, paddingTop: 72 },
-  pieContenedorMovil: { paddingHorizontal: 18, paddingTop: 56 },
-  sobreMi: { gap: 26, paddingVertical: 34, borderTopWidth: 4, borderBottomWidth: 4, borderColor: '#111111' },
-  sobreMiEscritorio: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'stretch', gap: 34 },
-  sobreMiMovil: { gap: 22, paddingTop: 22, paddingBottom: 30 },
-  columnaNumeroSobreMi: { width: 98, gap: 10, paddingRight: 16, borderRightWidth: 3, borderRightColor: '#111111' },
-  columnaNumeroSobreMiMovil: { width: '100%', minHeight: 82, flexDirection: 'row', alignItems: 'center', gap: 16, paddingRight: 0, paddingBottom: 12, borderRightWidth: 0, borderBottomWidth: 2, borderBottomColor: '#111111' },
-  numeroSobreMi: { color: COLOR_MORADO, fontFamily: FUENTE_TITULOS, fontSize: 104, lineHeight: 92 },
-  textoVerticalSobreMi: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 8, fontWeight: '900', letterSpacing: 1 },
-  sobreMiTexto: { flex: 1, maxWidth: 430 },
-  tituloSobreMi: { color: '#111111', fontFamily: FUENTE_TITULOS, fontSize: 40, lineHeight: 45, letterSpacing: 0.2, marginTop: 8 },
-  columnaDescripcionSobreMi: { flex: 1, maxWidth: 470, gap: 22 },
-  descripcionSobreMi: { color: '#202020', fontFamily: FUENTE_TEXTO, fontSize: 12, lineHeight: 20 },
-  fichaAutor: { flexDirection: 'row', flexWrap: 'wrap', borderTopWidth: 2, borderLeftWidth: 2, borderColor: '#111111' },
-  textoFichaAutor: { width: '42%', color: '#f5fbfd', backgroundColor: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 7, fontWeight: '800', letterSpacing: 0.5, padding: 7, borderRightWidth: 2, borderBottomWidth: 2, borderColor: '#111111' },
-  valorFichaAutor: { width: '58%', color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 8, fontWeight: '900', padding: 7, borderRightWidth: 2, borderBottomWidth: 2, borderColor: '#111111' },
-  firmaPersonal: { alignSelf: 'flex-end', flexDirection: 'row', alignItems: 'center', gap: 9, paddingTop: 4 },
-  slashFirmaPersonal: { color: COLOR_MORADO, fontFamily: FUENTE_TITULOS, fontSize: 28, lineHeight: 30 },
-  textoFirmaPersonal: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 8, fontWeight: '900', letterSpacing: 0.7 },
-  tarjetaContacto: { position: 'relative', overflow: 'hidden', padding: 28, backgroundColor: '#111111', borderWidth: 4, borderColor: '#111111', gap: 24, marginTop: 54 },
-  tarjetaContactoEscritorio: { minHeight: 250, paddingHorizontal: 42, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 40 },
-  tarjetaContactoMovil: { marginTop: 42, padding: 22, gap: 22 },
-  textoFondoContacto: { position: 'absolute', left: -8, bottom: -44, color: '#f5fbfd', opacity: 0.055, fontFamily: FUENTE_TITULOS, fontSize: 118, letterSpacing: -2 },
-  contactoTexto: { maxWidth: 650 },
-  etiquetaContacto: { color: '#8ed7e8', fontFamily: FUENTE_TEXTO, fontSize: 9, fontWeight: '900', letterSpacing: 1 },
-  tituloContacto: { color: '#f5fbfd', fontFamily: FUENTE_TITULOS, fontSize: 42, lineHeight: 48, letterSpacing: 0.2, marginTop: 8 },
-  descripcionContacto: { color: '#b9cdd4', fontFamily: FUENTE_TEXTO, fontSize: 11, lineHeight: 19, marginTop: 8 },
-  botonContacto: { minHeight: 52, paddingHorizontal: 20, backgroundColor: '#f5fbfd', borderWidth: 3, borderColor: '#f5fbfd', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 9 },
-  textoBotonContacto: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 9, fontWeight: '900', letterSpacing: 0.6 },
-  filaCopyright: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 10, paddingVertical: 30 },
-  textoCopyright: { color: '#111111', fontFamily: FUENTE_TEXTO, fontSize: 8, fontWeight: '800', letterSpacing: 0.4 },
+const styles = StyleSheet.create({
+  pagina: { flex: 1, backgroundColor: HIELO },
+  scroll: { minHeight: '100%' },
+  cabeceraWrap: { width: '100%', maxWidth: 1380, alignSelf: 'center', paddingHorizontal: 34 },
+  paddingMovil: { paddingHorizontal: 17 },
+  lineaFondoA: { position: 'absolute', top: 104, left: 0, right: 0, height: 1, backgroundColor: 'rgba(32,40,247,0.16)' },
+  lineaFondoB: { position: 'absolute', top: 520, left: 0, right: 0, height: 1, backgroundColor: 'rgba(32,40,247,0.08)' },
+  trama: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, overflow: 'hidden' },
+  punto: { width: 3, height: 3, borderRadius: 2 },
+  tramaFondoA: { position: 'absolute', right: -14, top: 128, width: 128, height: 90, transform: [{ rotate: '-9deg' }] },
+  tramaFondoB: { position: 'absolute', left: -22, top: 680, width: 100, height: 70 },
+  fondoCruz: { position: 'absolute', top: 156, left: 13, color: AZUL, fontFamily: MONO, fontSize: 27 },
+  estrella: { color: AZUL, fontSize: 38, lineHeight: 40 },
+  estrellaClara: { color: HIELO },
+  estrellaPequena: { fontSize: 22, lineHeight: 24 },
+  nav: { minHeight: 102, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 2, borderBottomColor: NEGRO },
+  logo: { color: NEGRO, fontFamily: DISPLAY, fontSize: 31, lineHeight: 31 },
+  logoSlash: { color: AZUL },
+  logoSub: { color: GRIS, fontFamily: MONO, fontSize: 6, fontWeight: '700', letterSpacing: 1.2, marginTop: 4 },
+  navLinks: { flexDirection: 'row', gap: 34 },
+  navLink: { color: NEGRO, fontFamily: MONO, fontSize: 9, fontWeight: '700', letterSpacing: 0.8 },
+  navContacto: { paddingHorizontal: 17, paddingVertical: 12, backgroundColor: NEGRO, borderBottomWidth: 5, borderBottomColor: AZUL },
+  navContactoTexto: { color: HIELO, fontFamily: MONO, fontSize: 8, fontWeight: '700', letterSpacing: 0.8 },
+  hero: { minHeight: 760, flexDirection: 'row', alignItems: 'center', gap: 42, paddingVertical: 58 },
+  heroColumna: { minHeight: 0, flexDirection: 'column', alignItems: 'stretch', paddingVertical: 44 },
+  heroTexto: { flex: 1.02, minWidth: 0 },
+  heroMeta: { flexDirection: 'row', justifyContent: 'space-between', gap: 12, paddingBottom: 10, borderBottomWidth: 1.5, borderBottomColor: NEGRO },
+  heroMetaTexto: { color: NEGRO, fontFamily: MONO, fontSize: 7, fontWeight: '700', letterSpacing: 0.8 },
+  heroTituloWrap: { position: 'relative', marginTop: 22 },
+  heroTitulo: { color: NEGRO, fontFamily: DISPLAY, fontSize: 95, lineHeight: 91, letterSpacing: -1.2 },
+  heroTituloSombra: { position: 'absolute', left: 6, top: 5, color: ROJO, fontFamily: DISPLAY, fontSize: 95, lineHeight: 91, letterSpacing: -1.2, opacity: 0.85 },
+  heroTituloAzul: { color: AZUL, fontFamily: DISPLAY, fontSize: 95, lineHeight: 91, letterSpacing: -1.2 },
+  heroTituloMovil: { fontSize: 56, lineHeight: 55, letterSpacing: -0.4 },
+  heroTituloSticker: { position: 'absolute', right: 4, top: '34%', width: 78, height: 78, alignItems: 'center', justifyContent: 'center', borderRadius: 42, backgroundColor: LILA, borderWidth: 2, borderColor: NEGRO, transform: [{ rotate: '12deg' }] },
+  heroTituloStickerTexto: { color: NEGRO, fontFamily: DISPLAY, fontSize: 19, lineHeight: 18, textAlign: 'center' },
+  heroIntro: { position: 'relative', maxWidth: 570, paddingLeft: 17, marginTop: 28, borderLeftWidth: 7, borderLeftColor: AZUL },
+  heroIntroTexto: { maxWidth: 430, color: '#292a30', fontFamily: MONO, fontSize: 11, lineHeight: 19 },
+  heroIntroNota: { position: 'absolute', right: 0, bottom: -15, color: AZUL, fontFamily: MANO, fontSize: 18, lineHeight: 18, textAlign: 'center', transform: [{ rotate: '-5deg' }] },
+  heroAcciones: { flexDirection: 'row', flexWrap: 'wrap', gap: 9, marginTop: 30 },
+  boton: { minHeight: 43, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingHorizontal: 15, backgroundColor: 'transparent', borderWidth: 1.5, borderColor: NEGRO },
+  botonClaro: { backgroundColor: HIELO, borderColor: HIELO, borderBottomWidth: 5, borderBottomColor: LILA },
+  botonAzul: { backgroundColor: AZUL, borderColor: AZUL, borderBottomWidth: 5, borderBottomColor: AZUL_OSCURO },
+  botonPresionado: { opacity: 0.78, transform: [{ translateY: 2 }] },
+  botonTexto: { color: NEGRO, fontFamily: MONO, fontSize: 8, fontWeight: '700', letterSpacing: 0.6 },
+  botonTextoClaro: { color: HIELO },
+  heroNumeros: { flexDirection: 'row', marginTop: 36, borderTopWidth: 1.5, borderBottomWidth: 1.5, borderColor: NEGRO },
+  heroNumero: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 11, paddingHorizontal: 8, borderRightWidth: 1, borderRightColor: NEGRO },
+  heroNumeroValor: { color: NEGRO, fontFamily: DISPLAY, fontSize: 25 },
+  heroNumeroTexto: { color: GRIS, fontFamily: MONO, fontSize: 5.5, fontWeight: '700', lineHeight: 9 },
+  heroCollageWrap: { flex: 0.93, minWidth: 0, alignItems: 'center' },
+  collage: { position: 'relative', width: '100%', maxWidth: 520, aspectRatio: 0.88, overflow: 'hidden', backgroundColor: AZUL, borderWidth: 2, borderColor: NEGRO, borderBottomWidth: 9, borderBottomColor: NEGRO },
+  collageMovil: { maxWidth: 570, alignSelf: 'center' },
+  collageFondoNegro: { position: 'absolute', width: '74%', height: '62%', left: -55, bottom: -15, backgroundColor: NEGRO, transform: [{ rotate: '-9deg' }] },
+  collageFondoLila: { position: 'absolute', width: '54%', height: '48%', right: -38, top: 32, backgroundColor: LILA, borderWidth: 2, borderColor: NEGRO, transform: [{ rotate: '8deg' }] },
+  collageAroA: { position: 'absolute', width: '90%', height: '45%', left: '4%', top: '28%', borderWidth: 2, borderColor: HIELO, borderRadius: 200, transform: [{ rotate: '-19deg' }] },
+  collageAroB: { position: 'absolute', width: 120, height: 120, left: 19, top: 77, borderWidth: 2, borderColor: HIELO, borderRadius: 70 },
+  collageTrama: { position: 'absolute', width: 170, height: 130, right: -11, bottom: 40 },
+  collageVentana: { position: 'absolute', width: '60%', aspectRatio: 0.84, right: 24, top: '13%', overflow: 'hidden', backgroundColor: HIELO, borderWidth: 3, borderColor: NEGRO, transform: [{ rotate: '4deg' }] },
+  barraVentana: { height: 28, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 8, backgroundColor: NEGRO },
+  barraVentanaClara: { backgroundColor: HIELO, borderBottomWidth: 1.5, borderBottomColor: NEGRO },
+  barraVentanaTitulo: { color: HIELO, fontFamily: MONO, fontSize: 6, fontWeight: '700', letterSpacing: 0.7 },
+  barraVentanaTituloOscuro: { color: NEGRO },
+  controlesVentana: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  controlVentana: { color: HIELO, fontFamily: MONO, fontSize: 10, fontWeight: '700' },
+  controlVentanaOscuro: { color: NEGRO },
+  collageRetrato: { width: '100%', flex: 1, filter: Platform.OS === 'web' ? 'grayscale(1) contrast(1.35)' : undefined },
+  collageVentanaPie: { height: 28, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 8, borderTopWidth: 1.5, borderTopColor: NEGRO },
+  collageVentanaPieTexto: { color: NEGRO, fontFamily: MONO, fontSize: 5.5, fontWeight: '700' },
+  collageRecorte: { position: 'absolute', left: 23, bottom: 32, width: 155, height: 170, overflow: 'hidden', backgroundColor: NEGRO, borderWidth: 3, borderColor: HIELO, borderRadius: 90, transform: [{ rotate: '-8deg' }] },
+  collageRecorteImagen: { width: 205, height: 205, marginLeft: -27, marginTop: -12, filter: Platform.OS === 'web' ? 'grayscale(1) contrast(1.65)' : undefined },
+  collageCursor: { position: 'absolute', left: 17, top: 20, flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 8, paddingVertical: 6, backgroundColor: HIELO, borderWidth: 2, borderColor: NEGRO, transform: [{ rotate: '-3deg' }] },
+  collageCursorTexto: { color: NEGRO, fontFamily: MONO, fontSize: 6, fontWeight: '700' },
+  collageNota: { position: 'absolute', right: 10, bottom: 9, paddingHorizontal: 10, paddingVertical: 7, backgroundColor: ROJO, borderWidth: 2, borderColor: NEGRO, transform: [{ rotate: '-3deg' }] },
+  collageNotaTexto: { color: HIELO, fontFamily: MANO, fontSize: 17, lineHeight: 16, textAlign: 'center' },
+  collageArchivo: { position: 'absolute', left: 12, top: '35%', width: 75, height: 75, alignItems: 'center', justifyContent: 'center', backgroundColor: LILA, borderWidth: 2, borderColor: NEGRO, transform: [{ rotate: '8deg' }] },
+  collageArchivoNumero: { color: NEGRO, fontFamily: DISPLAY, fontSize: 30, lineHeight: 31 },
+  collageArchivoTexto: { color: NEGRO, fontFamily: MONO, fontSize: 5, fontWeight: '700', textAlign: 'center' },
+  collageEstrellaA: { position: 'absolute', left: '43%', top: '51%' },
+  collageEstrellaB: { position: 'absolute', right: 14, top: 55 },
+  collageTextoVertical: { position: 'absolute', right: -69, top: '47%', width: 175, color: HIELO, fontFamily: MONO, fontSize: 6, fontWeight: '700', letterSpacing: 0.8, transform: [{ rotate: '90deg' }] },
+  marquesina: { width: '105%', alignSelf: 'center', overflow: 'hidden', paddingVertical: 14, backgroundColor: AZUL, borderTopWidth: 2, borderBottomWidth: 2, borderColor: NEGRO, transform: [{ rotate: '-1.2deg' }] },
+  marquesinaTexto: { color: HIELO, fontFamily: MONO, fontSize: 10, fontWeight: '700', letterSpacing: 1.2, textAlign: 'center' },
+  proyectos: { width: '100%', maxWidth: 1380, alignSelf: 'center', paddingHorizontal: 34, paddingTop: 105, paddingBottom: 115 },
+  proyectosCabecera: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 48, paddingBottom: 20, borderBottomWidth: 3, borderBottomColor: NEGRO },
+  proyectosCabeceraMovil: { alignItems: 'flex-start', gap: 14 },
+  seccionSobrelinea: { color: AZUL, fontFamily: MONO, fontSize: 8, fontWeight: '700', letterSpacing: 1 },
+  seccionTitulo: { color: NEGRO, fontFamily: DISPLAY, fontSize: 78, lineHeight: 74, marginTop: 8 },
+  seccionTituloMovil: { fontSize: 49, lineHeight: 48 },
+  proyectosNota: { flexDirection: 'row', alignItems: 'flex-end', gap: 12, transform: [{ rotate: '-4deg' }] },
+  proyectosNotaTexto: { color: AZUL, fontFamily: MANO, fontSize: 20, lineHeight: 19, textAlign: 'right' },
+  proyectosNotaFlecha: { color: AZUL, fontFamily: MANO, fontSize: 33 },
+  listaProyectos: { gap: 72 },
+  interrupcionEditorial: { position: 'relative', minHeight: 210, justifyContent: 'center', overflow: 'hidden', paddingHorizontal: 35, backgroundColor: HIELO, borderTopWidth: 3, borderBottomWidth: 3, borderColor: NEGRO, transform: [{ rotate: '1deg' }] },
+  interrupcionEditorialGrande: { color: NEGRO, fontFamily: DISPLAY, fontSize: 92, lineHeight: 96 },
+  interrupcionEditorialNota: { position: 'absolute', right: 38, bottom: 38, color: AZUL, fontFamily: MANO, fontSize: 23, lineHeight: 21, textAlign: 'right', transform: [{ rotate: '-5deg' }] },
+  interrupcionEditorialEstrella: { position: 'absolute', right: '35%', top: 26 },
+  cargando: { marginTop: 24 },
+  escena: { position: 'relative', minHeight: 600, overflow: 'hidden', borderWidth: 2, borderColor: NEGRO },
+  escenaMovil: { minHeight: 0, flexDirection: 'column' },
+  escenaSiwo: { flexDirection: 'row', backgroundColor: HIELO },
+  numeroFondoSiwo: { position: 'absolute', left: -18, bottom: -68, color: '#ddd9c9', fontFamily: DISPLAY, fontSize: 260, lineHeight: 270 },
+  siwoTexto: { zIndex: 2, width: '39%', justifyContent: 'center', padding: 38 },
+  textoProyectoMovil: { width: '100%', padding: 24 },
+  etiqueta: { alignSelf: 'flex-start', paddingHorizontal: 9, paddingVertical: 6, backgroundColor: HIELO, borderWidth: 1.5, borderColor: NEGRO },
+  etiquetaAzul: { backgroundColor: AZUL, borderColor: AZUL },
+  etiquetaRoja: { backgroundColor: ROJO, borderColor: ROJO },
+  etiquetaTexto: { color: NEGRO, fontFamily: MONO, fontSize: 7, fontWeight: '700', letterSpacing: 0.7 },
+  etiquetaTextoClaro: { color: HIELO },
+  tituloProyecto: { color: NEGRO, fontFamily: DISPLAY, fontSize: 67, lineHeight: 70, marginTop: 20 },
+  tituloProyectoClaro: { color: HIELO, fontFamily: DISPLAY, fontSize: 67, lineHeight: 70, textTransform: 'uppercase', marginTop: 20 },
+  tituloProyectoMovil: { fontSize: 47, lineHeight: 50 },
+  tituloCorreos: { fontSize: 57, lineHeight: 59 },
+  bajadaProyecto: { color: NEGRO, fontFamily: MONO, fontSize: 10, fontWeight: '700', lineHeight: 16, marginTop: 12 },
+  bajadaProyectoClara: { color: HIELO, fontFamily: MONO, fontSize: 10, fontWeight: '700', lineHeight: 16, marginTop: 12 },
+  descripcionProyecto: { color: '#303039', fontFamily: MONO, fontSize: 10, lineHeight: 17, marginTop: 15 },
+  descripcionProyectoClara: { color: '#d9dcff', fontFamily: MONO, fontSize: 10, lineHeight: 17, marginTop: 15 },
+  miniDatos: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 19 },
+  miniDato: { color: NEGRO, fontFamily: MONO, fontSize: 6.5, fontWeight: '700', paddingHorizontal: 7, paddingVertical: 5, backgroundColor: LILA, borderWidth: 1, borderColor: NEGRO },
+  accionesProyecto: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginTop: 24 },
+  githubProyecto: { width: 43, height: 43, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderColor: NEGRO },
+  githubProyectoOscuro: { borderColor: HIELO },
+  siwoVisual: { position: 'relative', flex: 1, minWidth: 0, justifyContent: 'center', padding: 34, backgroundColor: LILA, borderLeftWidth: 2, borderLeftColor: NEGRO },
+  siwoVisualMovil: { minHeight: 390, borderLeftWidth: 0, borderTopWidth: 2, borderTopColor: NEGRO },
+  siwoSombra: { position: 'absolute', left: 48, top: 58, right: 20, bottom: 49, backgroundColor: AZUL, borderWidth: 2, borderColor: NEGRO, transform: [{ rotate: '3deg' }] },
+  siwoCapturaMarco: { width: '94%', alignSelf: 'center', aspectRatio: 1264 / 820, overflow: 'hidden', backgroundColor: HIELO, borderWidth: 2, borderColor: NEGRO, transform: [{ rotate: '-2deg' }] },
+  siwoCaptura: { width: '100%', flex: 1 },
+  siwoSticker: { position: 'absolute', right: 25, bottom: 24, width: 92, height: 92, alignItems: 'center', justifyContent: 'center', borderRadius: 50, backgroundColor: ROJO, borderWidth: 2, borderColor: NEGRO, transform: [{ rotate: '9deg' }] },
+  siwoStickerTexto: { color: HIELO, fontFamily: DISPLAY, fontSize: 23, lineHeight: 22, textAlign: 'center' },
+  siwoAnotacion: { position: 'absolute', left: 20, bottom: 18, color: NEGRO, fontFamily: MANO, fontSize: 20, lineHeight: 19, transform: [{ rotate: '-6deg' }] },
+  escenaCodecut: { flexDirection: 'row', backgroundColor: NEGRO },
+  codecutTrama: { position: 'absolute', width: 220, height: 170, right: -10, top: 20 },
+  codecutVisual: { position: 'relative', width: '59%', minHeight: 600, overflow: 'hidden', backgroundColor: AZUL, borderRightWidth: 2, borderRightColor: HIELO },
+  codecutVisualMovil: { width: '100%', minHeight: 420, borderRightWidth: 0, borderBottomWidth: 2, borderBottomColor: HIELO },
+  codecutRatio: { position: 'absolute', left: -8, bottom: -46, color: LILA, fontFamily: DISPLAY, fontSize: 220, lineHeight: 230 },
+  codecutRatioMovil: { fontSize: 145, lineHeight: 160 },
+  timelineVentana: { position: 'absolute', left: '9%', right: '8%', top: '16%', paddingBottom: 13, backgroundColor: HIELO, borderWidth: 3, borderColor: NEGRO, transform: [{ rotate: '-3deg' }] },
+  timelineRegla: { height: 28, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', borderBottomWidth: 1, borderBottomColor: NEGRO },
+  timelineReglaTexto: { color: GRIS, fontFamily: MONO, fontSize: 6, fontWeight: '700' },
+  timelineFila: { height: 38, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 8, marginHorizontal: 9, marginTop: 8, borderWidth: 1, borderColor: NEGRO },
+  timelineFilaNumero: { width: 18, color: NEGRO, fontFamily: MONO, fontSize: 6, fontWeight: '700' },
+  timelineClip: { height: 22, backgroundColor: AZUL },
+  timelineClipLila: { backgroundColor: LILA },
+  timelineClipNegro: { flex: 1, height: 22, backgroundColor: NEGRO },
+  timelineCursor: { position: 'absolute', left: '58%', top: 29, bottom: 10, width: 2, backgroundColor: ROJO },
+  codecutPlay: { position: 'absolute', right: 28, bottom: 24, width: 72, height: 72, alignItems: 'center', justifyContent: 'center', borderRadius: 40, backgroundColor: HIELO, borderWidth: 2, borderColor: NEGRO },
+  codecutNota: { position: 'absolute', left: 20, top: 25, color: HIELO, fontFamily: MANO, fontSize: 22, transform: [{ rotate: '-6deg' }] },
+  codecutTexto: { flex: 1, justifyContent: 'center', padding: 38, backgroundColor: NEGRO },
+  codecutStack: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 20 },
+  codecutStackTexto: { color: HIELO, fontFamily: MONO, fontSize: 6.5, fontWeight: '700', paddingHorizontal: 8, paddingVertical: 5, borderWidth: 1, borderColor: LILA },
+  escenaPortfolio: { flexDirection: 'row', minHeight: 640, backgroundColor: AZUL },
+  portfolioPalabraFondo: { position: 'absolute', left: -8, top: -16 },
+  portfolioPalabra: { color: '#0d169f', fontFamily: DISPLAY, fontSize: 120, lineHeight: 101 },
+  portfolioPalabraMovil: { fontSize: 76, lineHeight: 67 },
+  portfolioTexto: { zIndex: 3, width: '38%', alignSelf: 'flex-end', padding: 38, backgroundColor: 'rgba(9,9,11,0.92)', borderTopWidth: 2, borderRightWidth: 2, borderColor: HIELO },
+  portfolioTextoMovil: { width: '100%', alignSelf: 'stretch', padding: 24, borderRightWidth: 0, borderBottomWidth: 2, borderBottomColor: HIELO },
+  portfolioNumero: { color: LILA, fontFamily: MONO, fontSize: 8, fontWeight: '700', marginTop: 17 },
+  portfolioCollage: { position: 'relative', flex: 1, minWidth: 0 },
+  portfolioCollageMovil: { minHeight: 460 },
+  portfolioRetratoGrande: { position: 'absolute', width: '61%', aspectRatio: 0.8, right: '8%', bottom: -20, overflow: 'hidden', backgroundColor: HIELO, borderWidth: 3, borderColor: NEGRO, transform: [{ rotate: '4deg' }] },
+  portfolioRetratoImagen: { width: '100%', height: '100%', filter: Platform.OS === 'web' ? 'grayscale(1) contrast(1.35)' : undefined },
+  portfolioPopup: { position: 'absolute', width: 240, left: '3%', top: '16%', paddingBottom: 14, backgroundColor: HIELO, borderWidth: 3, borderColor: NEGRO, transform: [{ rotate: '-5deg' }] },
+  portfolioPopupTexto: { color: NEGRO, fontFamily: MONO, fontSize: 8, fontWeight: '700', lineHeight: 14, padding: 15 },
+  portfolioPopupBoton: { alignSelf: 'flex-end', marginRight: 14, paddingHorizontal: 18, paddingVertical: 6, backgroundColor: AZUL, borderWidth: 1, borderColor: NEGRO },
+  portfolioPopupBotonTexto: { color: HIELO, fontFamily: MONO, fontSize: 7, fontWeight: '700' },
+  portfolioEstrella: { position: 'absolute', right: 13, top: 21 },
+  portfolioTrama: { position: 'absolute', width: 170, height: 120, left: 25, bottom: 18 },
+  escenaCorreos: { flexDirection: 'row', backgroundColor: HIELO },
+  correosTexto: { width: '42%', justifyContent: 'center', padding: 38 },
+  correosVisual: { position: 'relative', flex: 1, minWidth: 0, minHeight: 600, overflow: 'hidden', backgroundColor: LILA, borderLeftWidth: 2, borderLeftColor: NEGRO },
+  correosVisualMovil: { minHeight: 430, borderLeftWidth: 0, borderTopWidth: 2, borderTopColor: NEGRO },
+  correosCsv: { position: 'absolute', right: -9, bottom: -40, color: '#aba6f2', fontFamily: DISPLAY, fontSize: 210, lineHeight: 220 },
+  correoA: { position: 'absolute', left: '14%', top: '18%', width: 96, height: 96, alignItems: 'center', justifyContent: 'center', borderRadius: 52, backgroundColor: AZUL, borderWidth: 3, borderColor: NEGRO },
+  correoB: { position: 'absolute', right: '15%', top: '13%', width: 84, height: 84, alignItems: 'center', justifyContent: 'center', backgroundColor: HIELO, borderWidth: 3, borderColor: NEGRO, transform: [{ rotate: '8deg' }] },
+  correoC: { position: 'absolute', right: '9%', bottom: '18%', width: 92, height: 92, alignItems: 'center', justifyContent: 'center', borderRadius: 50, backgroundColor: ROJO, borderWidth: 3, borderColor: NEGRO },
+  correoLineaA: { position: 'absolute', left: '27%', top: '28%', width: '49%', height: 2, backgroundColor: NEGRO, transform: [{ rotate: '-8deg' }] },
+  correoLineaB: { position: 'absolute', left: '27%', top: '33%', width: '55%', height: 2, backgroundColor: NEGRO, transform: [{ rotate: '31deg' }] },
+  correoLineaC: { position: 'absolute', right: '16%', top: '29%', width: 2, height: '49%', backgroundColor: NEGRO, transform: [{ rotate: '-9deg' }] },
+  correosVentana: { position: 'absolute', left: '13%', right: '17%', top: '43%', paddingBottom: 13, backgroundColor: NEGRO, borderWidth: 3, borderColor: HIELO, transform: [{ rotate: '-2deg' }] },
+  correosVentanaTexto: { color: '#bcc4ff', fontFamily: MONO, fontSize: 8, lineHeight: 18, padding: 14 },
+  correosNota: { position: 'absolute', left: 19, bottom: 17, color: AZUL, fontFamily: MANO, fontSize: 20, lineHeight: 19, transform: [{ rotate: '-5deg' }] },
+  sobreMi: { width: '100%', maxWidth: 1380, alignSelf: 'center', flexDirection: 'row', minHeight: 600, borderTopWidth: 3, borderBottomWidth: 3, borderColor: NEGRO },
+  sobreMiColumna: { flexDirection: 'column' },
+  sobreMiEnLista: { transform: [{ rotate: '-0.7deg' }] },
+  sobreMiVisual: { position: 'relative', flex: 0.9, minHeight: 530, overflow: 'hidden', backgroundColor: NEGRO, borderRightWidth: 3, borderRightColor: NEGRO },
+  sobreMiPalabra: { position: 'absolute', left: -8, top: -15, color: '#17171d', fontFamily: DISPLAY, fontSize: 137, lineHeight: 122 },
+  sobreMiRetratoMarco: { position: 'absolute', width: 290, height: 360, left: '16%', bottom: -18, overflow: 'hidden', backgroundColor: HIELO, borderWidth: 3, borderColor: HIELO, transform: [{ rotate: '-5deg' }] },
+  sobreMiRetrato: { width: '100%', height: '100%', filter: Platform.OS === 'web' ? 'grayscale(1) contrast(1.45)' : undefined },
+  sobreMiTrama: { position: 'absolute', width: 190, height: 135, right: -12, top: 22 },
+  sobreMiEstrella: { position: 'absolute', right: 30, bottom: 30 },
+  sobreMiSticker: { position: 'absolute', left: 23, top: 28, width: 87, height: 87, alignItems: 'center', justifyContent: 'center', borderRadius: 47, backgroundColor: ROJO, borderWidth: 2, borderColor: HIELO, transform: [{ rotate: '9deg' }] },
+  sobreMiStickerTexto: { color: HIELO, fontFamily: DISPLAY, fontSize: 18, lineHeight: 17, textAlign: 'center' },
+  sobreMiContenido: { flex: 1.1, justifyContent: 'center', padding: 48, backgroundColor: LILA },
+  sobreMiContenidoMovil: { padding: 25 },
+  sobreMiKicker: { color: AZUL, fontFamily: MONO, fontSize: 8, fontWeight: '700', letterSpacing: 0.9 },
+  sobreMiTitulo: { color: NEGRO, fontFamily: DISPLAY, fontSize: 56, lineHeight: 58, marginTop: 13 },
+  sobreMiTituloMovil: { fontSize: 40, lineHeight: 42 },
+  sobreMiTexto: { color: '#303039', fontFamily: MONO, fontSize: 11, lineHeight: 19, marginTop: 20 },
+  manifiestoLista: { marginTop: 25, borderBottomWidth: 1.5, borderBottomColor: NEGRO },
+  manifiestoItem: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 13, borderTopWidth: 1.5, borderTopColor: NEGRO },
+  manifiestoNumero: { color: AZUL, fontFamily: DISPLAY, fontSize: 22 },
+  manifiestoTexto: { flex: 1, color: NEGRO, fontFamily: MONO, fontSize: 8, fontWeight: '700', letterSpacing: 0.4 },
+  manifiestoFlecha: { color: NEGRO, fontFamily: MONO, fontSize: 17 },
+  contacto: { position: 'relative', width: '100%', maxWidth: 1380, minHeight: 390, alignSelf: 'center', justifyContent: 'center', padding: 55, overflow: 'hidden', backgroundColor: AZUL, borderBottomWidth: 3, borderBottomColor: NEGRO },
+  contactoMovil: { minHeight: 430, padding: 25 },
+  contactoTrama: { position: 'absolute', right: -10, top: -15, width: 300, height: 205 },
+  contactoMicro: { color: '#bdc4ff', fontFamily: MONO, fontSize: 8, fontWeight: '700', letterSpacing: 1 },
+  contactoTitulo: { color: HIELO, fontFamily: DISPLAY, fontSize: 87, lineHeight: 84, marginTop: 10 },
+  contactoTituloMovil: { fontSize: 53, lineHeight: 52 },
+  contactoNota: { position: 'absolute', left: '57%', top: '45%', color: HIELO, fontFamily: MANO, fontSize: 26, transform: [{ rotate: '-7deg' }] },
+  contactoBotones: { position: 'absolute', right: 55, bottom: 48, alignItems: 'flex-end', gap: 11 },
+  contactoBotonesMovil: { position: 'relative', right: 0, bottom: 0, alignSelf: 'flex-start', alignItems: 'flex-start', marginTop: 65 },
+  contactoCorreo: { color: HIELO, fontFamily: MONO, fontSize: 7, fontWeight: '700' },
+  contactoEstrella: { position: 'absolute', right: 55, top: 45 },
+  footer: { width: '100%', maxWidth: 1380, alignSelf: 'center', flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 14, paddingHorizontal: 34, paddingVertical: 29 },
+  footerTexto: { color: GRIS, fontFamily: MONO, fontSize: 7, fontWeight: '700', letterSpacing: 0.5 },
+  footerLinks: { flexDirection: 'row', gap: 18 },
+  footerLink: { color: NEGRO, fontFamily: MONO, fontSize: 8, fontWeight: '700' },
 });

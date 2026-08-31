@@ -49,11 +49,11 @@ const CASOS = {
   },
   portfolio: {
     repo: 'portfolio',
-    titulo: 'Portfolio editorial',
+    titulo: 'Portfolio digital',
     categoria: 'PORTFOLIO / FRONTEND',
-    resumen: 'Portfolio personal construido con React Native Web y Expo Router, con dirección editorial inspirada en manga y casos de estudio navegables.',
+    resumen: 'Portfolio personal construido con React Native Web y Expo Router, con una identidad de collage digital, módulos de interfaz y casos de estudio navegables.',
     problema: 'Una cuadrícula de repositorios no comunica por sí sola el criterio, el proceso ni la personalidad detrás del trabajo; el reto era convertir los proyectos técnicos en una experiencia reconocible.',
-    solucion: 'Diseñé una publicación digital responsive que selecciona proyectos manualmente, obtiene sus datos desde GitHub y presenta cada pieza como un caso de estudio dentro de una identidad editorial coherente.',
+    solucion: 'Diseñé un sistema visual responsive que selecciona proyectos manualmente, obtiene sus datos desde GitHub y presenta cada pieza como un caso de estudio dentro de una identidad digital coherente.',
     notaAutor: 'Este sitio también es mi laboratorio visual. Lo ajusto mientras aprendo qué partes cuentan algo sobre mi trabajo y cuáles solo ocupan espacio.',
     loQueCambiaria: 'Quiero documentar más del proceso real —bocetos, decisiones descartadas y comparaciones— a medida que cada proyecto evolucione.',
     decisiones: [
