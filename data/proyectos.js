@@ -10,6 +10,10 @@ const CASOS = {
     repo: 'Siwo',
     titulo: 'Siwö',
     categoria: 'BUSCADOR / FRONTEND',
+    indice: '01',
+    anio: '2026',
+    rol: 'PRODUCTO + FRONTEND',
+    frase: 'Encontrar una canción entre cientos sin convertir la búsqueda en trabajo.',
     resumen: 'Archivo de openings y endings de anime con 623 series, filtros por temporada y un índice regenerado automáticamente.',
     problema: 'La colección original reunía cientos de enlaces, pero encontrar una serie concreta exigía navegar manualmente por una gran cantidad de contenido.',
     solucion: 'Convertí esa colección en un buscador estático rápido: el índice se genera durante el build, se enriquece con metadatos y queda listo para filtrar desde el navegador.',
@@ -31,6 +35,10 @@ const CASOS = {
     repo: 'CodeCut',
     titulo: 'CodeCut 9:16',
     categoria: 'VIDEO / FULL-STACK',
+    indice: '02',
+    anio: '2026',
+    rol: 'UX + FULL-STACK',
+    frase: 'Una línea de tiempo que conserva el ritmo incluso cuando el video todavía no existe.',
     resumen: 'Editor de video vertical con timeline multi-clip, textos, transiciones, PIP y exportación mediante FFmpeg.',
     problema: 'Editar varias piezas para formato vertical requiere coordinar clips, cortes, capas y exportación sin perder el estado del proyecto.',
     solucion: 'Construí un editor con timeline interactivo y un flujo de exportación asíncrono que procesa la composición en el servidor y comunica el progreso en tiempo real.',
@@ -51,6 +59,10 @@ const CASOS = {
     repo: 'portfolio',
     titulo: 'Portfolio digital',
     categoria: 'PORTFOLIO / FRONTEND',
+    indice: '03',
+    anio: '2026',
+    rol: 'DIRECCIÓN + FRONTEND',
+    frase: 'El sistema visual también es parte del argumento.',
     resumen: 'Portfolio personal construido con React Native Web y Expo Router, con una identidad de collage digital, módulos de interfaz y casos de estudio navegables.',
     problema: 'Una cuadrícula de repositorios no comunica por sí sola el criterio, el proceso ni la personalidad detrás del trabajo; el reto era convertir los proyectos técnicos en una experiencia reconocible.',
     solucion: 'Diseñé un sistema visual responsive que selecciona proyectos manualmente, obtiene sus datos desde GitHub y presenta cada pieza como un caso de estudio dentro de una identidad digital coherente.',
@@ -72,6 +84,10 @@ const CASOS = {
     repo: 'Buscador-de-correos',
     titulo: 'Buscador de correos',
     categoria: 'DATOS / FULL-STACK',
+    indice: '04',
+    anio: '2026',
+    rol: 'ARQUITECTURA + FULL-STACK',
+    frase: 'Hacer visible un proceso lento para que nunca se sienta detenido.',
     resumen: 'Herramienta para localizar negocios, extraer correos públicos y exportar resultados a CSV.',
     problema: 'Encontrar contactos públicos de negocios locales combina búsqueda geográfica, revisión de sitios y limpieza de resultados en un proceso lento y repetitivo.',
     solucion: 'Construí una interfaz que consulta negocios por ubicación o texto, procesa sus sitios de forma concurrente y entrega resultados exportables mientras muestra el avance.',
@@ -91,6 +107,8 @@ const CASOS = {
 };
 
 export const obtenerCasoProyecto = (nombre = '') => CASOS[nombre.toLowerCase()] || null;
+
+export const obtenerCasos = () => PROYECTOS_DESTACADOS.map((nombre) => obtenerCasoProyecto(nombre));
 
 export const seleccionarProyectos = (repositorios = []) => {
   const repositoriosPorNombre = new Map(
