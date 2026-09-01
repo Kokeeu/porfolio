@@ -8,6 +8,8 @@ const sources = {
   'Buscador-de-correos': require('../../../assets/editorial/fluid-state.jpg'),
 };
 
+export const getProjectImage = (repo) => sources[repo] || sources.portfolio;
+
 const schemes = {
   Siwo: { accent: colors.acid, ink: colors.ink, label: 'REAL INTERFACE / SIWÖ' },
   CodeCut: { accent: colors.violet, ink: colors.paper, label: 'VISUAL REFERENCE / MOTION' },
@@ -23,7 +25,7 @@ export default function CaseVisual({ caso, compact = false, hero = false }) {
   return (
     <View style={[styles.frame, compact && styles.frameCompact, hero && styles.frameHero]}>
       <Image
-        source={sources[caso.repo] || sources.portfolio}
+        source={getProjectImage(caso.repo)}
         style={styles.image}
         resizeMode={caso.repo === 'Siwo' ? 'contain' : 'cover'}
         accessibilityLabel={`Visual editorial de ${caso.titulo}`}
@@ -60,4 +62,3 @@ const styles = StyleSheet.create({
   captionRole: { marginTop: 6, color: colors.cyan, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 1 },
   signal: { position: 'absolute', left: 0, top: '43%', width: 44, height: 4 },
 });
-

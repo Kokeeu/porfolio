@@ -1,89 +1,191 @@
-import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { obtenerCasos } from '../../../data/proyectos';
 import { colors, fonts, layout } from '../../design/tokens';
-import CaseVisual, { getProjectScheme } from './CaseVisual';
+import { getProjectImage, getProjectScheme } from './CaseVisual';
 
-const ArchiveRow = ({ caso, active, onFocus, onPress }) => {
+const SlideMeta = ({ caso, dark = false }) => (
+  <View style={styles.slideMeta}>
+    <Text style={[styles.slideMetaText, dark && styles.slideMetaDark]}>{caso.indice} / {caso.anio}</Text>
+    <Text style={[styles.slideMetaText, dark && styles.slideMetaDark]}>{caso.categoria}</Text>
+  </View>
+);
+
+function ProjectSlide({ caso, variant, compact, onPress }) {
   const scheme = getProjectScheme(caso.repo);
+  const darkCopy = variant === 'data' || variant === 'quote';
+
+  if (variant === 'lead') {
+    return (
+      <Pressable accessibilityRole="link" accessibilityLabel={`Abrir caso de estudio: ${caso.titulo}`} onPress={onPress} style={({ pressed, hovered }) => [styles.slide, styles.leadSlide, (pressed || hovered) && styles.slideActive]}>
+        <Image source={getProjectImage(caso.repo)} style={styles.fullImage} resizeMode={caso.repo === 'Siwo' ? 'contain' : 'cover'} accessibilityLabel={`Visual de ${caso.titulo}`} />
+        <View style={styles.leadShade} />
+        <View style={styles.leadFrame} />
+        <SlideMeta caso={caso} />
+        <View style={styles.leadCopy}>
+          <Text style={styles.leadTitle}>{caso.titulo.toUpperCase()}</Text>
+          <Text style={styles.leadPhrase}>{caso.frase}</Text>
+        </View>
+        <View style={[styles.metricStamp, { backgroundColor: scheme.accent }]}>
+          <Text style={[styles.metricStampValue, { color: scheme.ink }]}>{caso.metrica}</Text>
+          <Text style={[styles.metricStampLabel, { color: scheme.ink }]}>PROJECT SIGNAL</Text>
+        </View>
+      </Pressable>
+    );
+  }
+
+  if (variant === 'data') {
+    return (
+      <Pressable accessibilityRole="link" accessibilityLabel={`Abrir caso de estudio: ${caso.titulo}`} onPress={onPress} style={({ pressed, hovered }) => [styles.slide, styles.dataSlide, { backgroundColor: scheme.accent }, (pressed || hovered) && styles.slideActive]}>
+        <SlideMeta caso={caso} dark />
+        <View style={styles.dataVisual}>
+          <Image source={getProjectImage(caso.repo)} style={styles.fullImage} resizeMode="cover" accessibilityLabel={`Visual de ${caso.titulo}`} />
+          <View style={styles.dataCross}><Text style={styles.dataCrossText}>＋</Text></View>
+        </View>
+        <View style={styles.dataCopy}>
+          <Text style={[styles.dataTitle, { color: scheme.ink }]}>{caso.titulo.toUpperCase()}</Text>
+          <Text style={[styles.dataSummary, { color: scheme.ink }]}>{caso.resumen}</Text>
+          <View style={[styles.dataRule, { backgroundColor: scheme.ink }]} />
+          <Text style={[styles.dataRole, { color: scheme.ink }]}>{caso.rol}</Text>
+        </View>
+      </Pressable>
+    );
+  }
+
+  if (variant === 'quote') {
+    return (
+      <Pressable accessibilityRole="link" accessibilityLabel={`Abrir caso de estudio: ${caso.titulo}`} onPress={onPress} style={({ pressed, hovered }) => [styles.slide, styles.quoteSlide, { backgroundColor: scheme.accent }, (pressed || hovered) && styles.slideActive]}>
+        <SlideMeta caso={caso} dark={darkCopy} />
+        <Text style={[styles.quoteMark, { color: scheme.ink }]}>“</Text>
+        <Text style={[styles.quoteText, compact && styles.quoteTextCompact, { color: scheme.ink }]}>{caso.frase}</Text>
+        <View style={styles.quoteVisual}>
+          <Image source={getProjectImage(caso.repo)} style={styles.fullImage} resizeMode="cover" accessibilityLabel={`Visual de ${caso.titulo}`} />
+        </View>
+        <View style={styles.quoteFooter}>
+          <Text style={[styles.quoteTitle, { color: scheme.ink }]}>{caso.titulo.toUpperCase()}</Text>
+          <Ionicons name="arrow-forward" size={23} color={scheme.ink} />
+        </View>
+      </Pressable>
+    );
+  }
+
   return (
-    <Pressable
-      accessibilityRole="link"
-      accessibilityLabel={`Abrir caso de estudio: ${caso.titulo}`}
-      onHoverIn={onFocus}
-      onFocus={onFocus}
-      onPress={onPress}
-      style={({ pressed, hovered }) => [styles.row, active && { backgroundColor: scheme.accent }, (pressed || hovered) && !active && styles.rowHover]}
-    >
-      <Text style={[styles.rowIndex, active && { color: scheme.ink }]}>{caso.indice}</Text>
-      <View style={styles.rowMain}>
-        <Text style={[styles.rowTitle, active && { color: scheme.ink }]}>{caso.titulo.toUpperCase()}</Text>
-        <Text style={[styles.rowCategory, active && { color: scheme.ink }]}>{caso.categoria}</Text>
+    <Pressable accessibilityRole="link" accessibilityLabel={`Abrir caso de estudio: ${caso.titulo}`} onPress={onPress} style={({ pressed, hovered }) => [styles.slide, styles.systemSlide, (pressed || hovered) && styles.slideActive]}>
+      <SlideMeta caso={caso} />
+      <View style={styles.systemGrid}>
+        <View style={styles.systemCopy}>
+          <Text style={styles.systemTitle}>{caso.titulo.toUpperCase()}</Text>
+          <Text style={styles.systemPhrase}>{caso.frase}</Text>
+          <View style={styles.stackRow}>
+            {caso.stack.slice(0, 3).map((item) => <Text key={item} style={styles.stackTag}>{item}</Text>)}
+          </View>
+        </View>
+        <View style={styles.systemVisual}>
+          <Image source={getProjectImage(caso.repo)} style={styles.fullImage} resizeMode="cover" accessibilityLabel={`Visual de ${caso.titulo}`} />
+          <View style={styles.systemTarget}><Text style={styles.systemTargetText}>◎</Text></View>
+        </View>
       </View>
-      <Text style={[styles.rowYear, active && { color: scheme.ink }]}>{caso.anio}</Text>
-      <Ionicons name="arrow-forward" size={20} color={active ? scheme.ink : colors.paper} />
+      <View style={styles.systemFooter}>
+        <Text style={styles.systemFooterText}>OPEN CASE STUDY</Text>
+        <Text style={styles.systemFooterText}>{caso.indice} — {caso.metrica}</Text>
+      </View>
     </Pressable>
   );
-};
+}
 
 export default function ProjectArchive({ compact }) {
   const router = useRouter();
-  const projects = useMemo(() => obtenerCasos(), []);
-  const [activeRepo, setActiveRepo] = useState(projects[0].repo);
-  const active = projects.find((project) => project.repo === activeRepo) || projects[0];
+  const projects = obtenerCasos();
   const openProject = (repo) => router.push({ pathname: '/proyecto/[nombre]', params: { nombre: repo } });
 
   return (
     <View style={styles.section}>
       <View style={[styles.heading, compact && styles.headingCompact]}>
         <View>
-          <Text style={styles.kicker}>[01] / ARCHIVO DE TRABAJO</Text>
-          <Text style={[styles.headingTitle, compact && styles.headingTitleCompact]}>CASOS{`\n`}SELECCIONADOS.</Text>
+          <Text style={styles.kicker}>[01] / SELECTED WORK DECK</Text>
+          <Text style={[styles.headingTitle, compact && styles.headingTitleCompact]}>CUATRO CASOS.{`\n`}CUATRO FORMAS{`\n`}DE ORDENAR EL RUIDO.</Text>
         </View>
-        <Text style={styles.headingNote}>CUATRO PROYECTOS.{`\n`}CUATRO PROBLEMAS DISTINTOS.{`\n`}UNA MISMA OBSESIÓN POR LA CLARIDAD.</Text>
+        <View style={styles.headingAside}>
+          <Text style={styles.headingCount}>04</Text>
+          <Text style={styles.headingNote}>NO ES UNA LISTA DE REPOSITORIOS.{`\n`}ES UNA SECUENCIA DE DECISIONES.</Text>
+        </View>
       </View>
 
-      <View style={[styles.archive, compact && styles.archiveCompact]}>
-        <View style={styles.rows}>
-          {projects.map((caso) => (
-            <ArchiveRow key={caso.repo} caso={caso} active={caso.repo === active.repo} onFocus={() => setActiveRepo(caso.repo)} onPress={() => openProject(caso.repo)} />
-          ))}
-          <View style={styles.activeCopy}>
-            <Text style={styles.activeCopyLabel}>IDEA CENTRAL</Text>
-            <Text style={styles.activeCopyText}>{active.frase}</Text>
-          </View>
+      <View style={[styles.deck, compact && styles.deckCompact]}>
+        <View style={[styles.deckRow, compact && styles.deckRowCompact]}>
+          <View style={styles.deckLead}><ProjectSlide caso={projects[0]} variant="lead" compact={compact} onPress={() => openProject(projects[0].repo)} /></View>
+          <View style={styles.deckSide}><ProjectSlide caso={projects[1]} variant="data" compact={compact} onPress={() => openProject(projects[1].repo)} /></View>
         </View>
-        <Pressable accessibilityRole="link" accessibilityLabel={`Abrir el proyecto ${active.titulo}`} onPress={() => openProject(active.repo)} style={({ pressed }) => [styles.preview, pressed && styles.previewPressed]}>
-          <CaseVisual key={active.repo} caso={active} compact={compact} />
-        </Pressable>
+        <View style={[styles.deckRow, styles.deckRowBottom, compact && styles.deckRowCompact]}>
+          <View style={styles.deckQuote}><ProjectSlide caso={projects[2]} variant="quote" compact={compact} onPress={() => openProject(projects[2].repo)} /></View>
+          <View style={styles.deckSystem}><ProjectSlide caso={projects[3]} variant="system" compact={compact} onPress={() => openProject(projects[3].repo)} /></View>
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  section: { width: '100%', maxWidth: layout.max, alignSelf: 'center', paddingVertical: 110, backgroundColor: colors.ink },
-  heading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', gap: 32, paddingHorizontal: layout.gutter, marginBottom: 54 },
-  headingCompact: { flexDirection: 'column', alignItems: 'flex-start', paddingHorizontal: layout.mobileGutter, marginBottom: 36 },
+  section: { width: '100%', maxWidth: layout.max, alignSelf: 'center', paddingVertical: 108, backgroundColor: colors.ink },
+  heading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, paddingHorizontal: layout.gutter, marginBottom: 52 },
+  headingCompact: { flexDirection: 'column', alignItems: 'flex-start', paddingHorizontal: layout.mobileGutter, marginBottom: 34 },
   kicker: { color: colors.acid, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700', letterSpacing: 1.1 },
-  headingTitle: { marginTop: 14, color: colors.paper, fontFamily: fonts.display, fontSize: 72, fontWeight: '900', lineHeight: 68, letterSpacing: -4 },
-  headingTitleCompact: { fontSize: 46, lineHeight: 45, letterSpacing: -2.8 },
-  headingNote: { maxWidth: 300, color: colors.fog, fontFamily: fonts.mono, fontSize: 8, lineHeight: 15, letterSpacing: 0.8 },
-  archive: { flexDirection: 'row', minHeight: 620, borderTopWidth: 1, borderBottomWidth: 1, borderColor: '#3c3c44' },
-  archiveCompact: { flexDirection: 'column-reverse' },
-  rows: { flex: 1, minWidth: 0, borderRightWidth: 1, borderRightColor: '#3c3c44' },
-  row: { minHeight: 96, flexDirection: 'row', alignItems: 'center', gap: 18, paddingHorizontal: layout.gutter, borderBottomWidth: 1, borderBottomColor: '#3c3c44' },
-  rowHover: { backgroundColor: '#141419' },
-  rowIndex: { width: 24, color: colors.fog, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700' },
-  rowMain: { flex: 1 },
-  rowTitle: { color: colors.paper, fontFamily: fonts.display, fontSize: 23, fontWeight: '900', letterSpacing: -1 },
-  rowCategory: { marginTop: 5, color: colors.fog, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 0.8 },
-  rowYear: { color: colors.paper, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700' },
-  activeCopy: { flex: 1, justifyContent: 'flex-end', padding: layout.gutter, backgroundColor: '#0c0c10' },
-  activeCopyLabel: { color: colors.cyan, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700', letterSpacing: 1 },
-  activeCopyText: { maxWidth: 540, marginTop: 12, color: colors.paper, fontFamily: fonts.serif, fontSize: 28, lineHeight: 34, fontStyle: 'italic' },
-  preview: { flex: 1.1, minWidth: 0 },
-  previewPressed: { opacity: 0.84 },
+  headingTitle: { marginTop: 16, color: colors.paper, fontFamily: fonts.display, fontSize: 61, lineHeight: 59, fontWeight: '900', letterSpacing: -3.4 },
+  headingTitleCompact: { fontSize: 41, lineHeight: 41, letterSpacing: -2.4 },
+  headingAside: { alignItems: 'flex-end', gap: 10 },
+  headingCount: { color: colors.violet, fontFamily: fonts.display, fontSize: 70, lineHeight: 68, fontWeight: '900' },
+  headingNote: { maxWidth: 280, color: colors.fog, fontFamily: fonts.mono, fontSize: 8, lineHeight: 15, letterSpacing: 0.7, textAlign: 'right' },
+  deck: { paddingHorizontal: layout.gutter, gap: 12 },
+  deckCompact: { paddingHorizontal: layout.mobileGutter },
+  deckRow: { minHeight: 570, flexDirection: 'row', gap: 12 },
+  deckRowBottom: { minHeight: 480 },
+  deckRowCompact: { minHeight: 0, flexDirection: 'column' },
+  deckLead: { flex: 1.35 },
+  deckSide: { flex: 0.75 },
+  deckQuote: { flex: 0.82 },
+  deckSystem: { flex: 1.18 },
+  slide: { flex: 1, minHeight: 460, position: 'relative', overflow: 'hidden', borderWidth: 1, borderColor: '#555560' },
+  slideActive: { transform: [{ translateY: -4 }], borderColor: colors.acid },
+  leadSlide: { backgroundColor: '#111116' },
+  fullImage: { width: '100%', height: '100%', backgroundColor: '#111116' },
+  leadShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,2,5,0.18)' },
+  leadFrame: { position: 'absolute', left: 18, right: 18, top: 18, bottom: 18, borderWidth: 1, borderColor: 'rgba(242,241,236,0.7)' },
+  slideMeta: { position: 'absolute', zIndex: 3, left: 20, right: 20, top: 19, flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
+  slideMetaText: { color: colors.paper, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 0.8 },
+  slideMetaDark: { color: colors.ink },
+  leadCopy: { position: 'absolute', left: 19, right: 19, bottom: 18, padding: 22, backgroundColor: 'rgba(5,5,7,0.94)' },
+  leadTitle: { color: colors.paper, fontFamily: fonts.display, fontSize: 50, lineHeight: 49, fontWeight: '900', letterSpacing: -2.8 },
+  leadPhrase: { maxWidth: 560, marginTop: 10, color: colors.fog, fontFamily: fonts.serif, fontSize: 18, lineHeight: 24, fontStyle: 'italic' },
+  metricStamp: { position: 'absolute', right: 32, top: 52, width: 92, height: 92, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '4deg' }] },
+  metricStampValue: { fontFamily: fonts.display, fontSize: 28, lineHeight: 30, fontWeight: '900' },
+  metricStampLabel: { marginTop: 4, fontFamily: fonts.mono, fontSize: 5, fontWeight: '700', letterSpacing: 0.5 },
+  dataSlide: { padding: 20 },
+  dataVisual: { height: '49%', marginTop: 35, position: 'relative', overflow: 'hidden', borderWidth: 1, borderColor: colors.ink },
+  dataCross: { position: 'absolute', right: 0, bottom: 0, width: 40, height: 40, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.paper },
+  dataCrossText: { color: colors.ink, fontSize: 24 },
+  dataCopy: { flex: 1, justifyContent: 'flex-end', paddingTop: 20 },
+  dataTitle: { fontFamily: fonts.display, fontSize: 34, lineHeight: 34, fontWeight: '900', letterSpacing: -1.7 },
+  dataSummary: { marginTop: 10, fontFamily: fonts.sans, fontSize: 12, lineHeight: 18 },
+  dataRule: { height: 1, marginTop: 17 },
+  dataRole: { marginTop: 9, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 0.8 },
+  quoteSlide: { padding: 24 },
+  quoteMark: { marginTop: 32, fontFamily: fonts.serif, fontSize: 74, lineHeight: 64 },
+  quoteText: { width: '73%', fontFamily: fonts.display, fontSize: 30, lineHeight: 31, fontWeight: '900', letterSpacing: -1.2 },
+  quoteTextCompact: { fontSize: 26, lineHeight: 28 },
+  quoteVisual: { position: 'absolute', right: -16, top: 92, width: '39%', height: '54%', overflow: 'hidden', borderWidth: 1, borderColor: colors.ink, transform: [{ rotate: '4deg' }] },
+  quoteFooter: { position: 'absolute', left: 24, right: 24, bottom: 22, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 14, borderTopWidth: 1, borderTopColor: colors.ink },
+  quoteTitle: { fontFamily: fonts.mono, fontSize: 9, fontWeight: '700', letterSpacing: 0.9 },
+  systemSlide: { padding: 20, backgroundColor: '#0c0c10' },
+  systemGrid: { flex: 1, flexDirection: 'row', gap: 18, marginTop: 38, marginBottom: 52 },
+  systemCopy: { flex: 1, justifyContent: 'center' },
+  systemTitle: { color: colors.paper, fontFamily: fonts.display, fontSize: 38, lineHeight: 38, fontWeight: '900', letterSpacing: -2 },
+  systemPhrase: { marginTop: 14, color: colors.fog, fontFamily: fonts.serif, fontSize: 17, lineHeight: 23, fontStyle: 'italic' },
+  stackRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 24 },
+  stackTag: { paddingHorizontal: 7, paddingVertical: 5, color: colors.cyan, fontFamily: fonts.mono, fontSize: 6, fontWeight: '700', borderWidth: 1, borderColor: '#44444e' },
+  systemVisual: { flex: 0.78, position: 'relative', overflow: 'hidden', borderWidth: 1, borderColor: colors.paper },
+  systemTarget: { position: 'absolute', left: '50%', top: '50%', width: 56, height: 56, alignItems: 'center', justifyContent: 'center', marginLeft: -28, marginTop: -28, borderRadius: 30, backgroundColor: colors.acid },
+  systemTargetText: { color: colors.ink, fontSize: 28 },
+  systemFooter: { position: 'absolute', left: 20, right: 20, bottom: 16, flexDirection: 'row', justifyContent: 'space-between', paddingTop: 11, borderTopWidth: 1, borderTopColor: '#555560' },
+  systemFooterText: { color: colors.paper, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 0.8 },
 });

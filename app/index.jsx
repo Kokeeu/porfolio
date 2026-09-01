@@ -30,10 +30,10 @@ export default function HomePage() {
       <StatusBar style="light" />
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <PortfolioHero compact={compact} onWork={goToWork} email={EMAIL} />
-        <Manifesto compact={compact} />
         <View onLayout={(event) => { projectsY.current = event.nativeEvent.layout.y; }}>
           <ProjectArchive compact={compact} />
         </View>
+        <Manifesto compact={compact} />
         <VisualLab compact={compact} />
         <About compact={compact} />
         <Contact compact={compact} email={EMAIL} linkedin={LINKEDIN} />

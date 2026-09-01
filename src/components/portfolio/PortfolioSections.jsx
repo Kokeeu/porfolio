@@ -14,7 +14,7 @@ export function Manifesto({ compact }) {
   return (
     <View style={[styles.manifesto, compact && styles.manifestoCompact]}>
       <View style={styles.manifestoLead}>
-        <Text style={styles.sectionKicker}>[00] / PRINCIPIO DE TRABAJO</Text>
+        <Text style={styles.sectionKicker}>[02] / PRINCIPIO DE TRABAJO</Text>
         <Text style={[styles.manifestoTitle, compact && styles.manifestoTitleCompact]}>
           LO DIGITAL NO TIENE QUE SENTIRSE <Text style={styles.manifestoItalic}>DESECHABLE.</Text>
         </Text>
@@ -43,7 +43,7 @@ export function VisualLab({ compact }) {
   return (
     <View style={[styles.lab, compact && styles.labCompact]}>
       <View style={styles.labIntro}>
-        <Text style={styles.labKicker}>VISUAL RESEARCH / 03 FRAGMENTS</Text>
+        <Text style={styles.labKicker}>[03] / VISUAL RESEARCH / 03 FRAGMENTS</Text>
         <Text style={[styles.labTitle, compact && styles.labTitleCompact]}>UN SISTEMA{`\n`}QUE PUEDE{`\n`}CAMBIAR DE PIEL.</Text>
         <Text style={styles.labCopy}>El archivo visual no es decoración: funciona como tensión entre orden técnico, ruido, textura y luz.</Text>
       </View>
@@ -66,7 +66,7 @@ export function About({ compact }) {
         <View style={styles.aboutIndex}><Text style={styles.aboutIndexText}>AS / 26</Text></View>
       </View>
       <View style={styles.aboutCopyWrap}>
-        <Text style={styles.aboutKicker}>[02] / SOBRE MÍ</Text>
+        <Text style={styles.aboutKicker}>[04] / SOBRE MÍ</Text>
         <Text style={[styles.aboutTitle, compact && styles.aboutTitleCompact]}>DESARROLLO{`\n`}CON CRITERIO{`\n`}VISUAL.</Text>
         <Text style={styles.aboutCopy}>Soy Anderson Solano, desarrollador frontend en Costa Rica. Me interesan los productos donde la experiencia, el movimiento y la implementación forman una sola conversación.</Text>
         <Text style={styles.aboutQuote}>“La rareza sirve cuando también mejora la lectura.”</Text>
