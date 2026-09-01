@@ -1,5 +1,5 @@
-import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useRef, useState } from 'react';
+import { AccessibilityInfo, Animated, Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, fonts, layout } from '../../design/tokens';
 
 const Marker = ({ children, dark = false }) => (
@@ -8,21 +8,121 @@ const Marker = ({ children, dark = false }) => (
   </View>
 );
 
-const Action = ({ children, onPress, inverted = false, label }) => (
-  <Pressable
-    accessibilityRole="button"
-    accessibilityLabel={label}
-    onPress={onPress}
-    style={({ pressed, hovered }) => [
-      styles.action,
-      inverted && styles.actionInverted,
-      (pressed || hovered) && styles.actionActive,
-    ]}
-  >
-    <Text style={[styles.actionText, inverted && styles.actionTextInverted]}>{children}</Text>
-    <Ionicons name="arrow-forward" size={16} color={inverted ? colors.ink : colors.paper} />
-  </Pressable>
-);
+const wave = [5, 12, 8, 18, 10, 22, 14, 7, 17, 11, 20, 6];
+
+function SignalSelector({ onWork, onContact, compact }) {
+  const [active, setActive] = useState('work');
+  const [trackWidth, setTrackWidth] = useState(0);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const position = useRef(new Animated.Value(0)).current;
+  const isContact = active === 'contact';
+
+  useEffect(() => {
+    AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
+    const subscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion);
+    return () => subscription?.remove();
+  }, []);
+
+  useEffect(() => {
+    const toValue = isContact ? 1 : 0;
+    if (reduceMotion) {
+      position.setValue(toValue);
+      return;
+    }
+
+    Animated.spring(position, {
+      toValue,
+      damping: 18,
+      stiffness: 210,
+      mass: 0.72,
+      useNativeDriver: true,
+    }).start();
+  }, [isContact, position, reduceMotion]);
+
+  const cursorX = position.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, trackWidth / 2],
+  });
+
+  const channelProps = (channel) => ({
+    accessibilityRole: 'link',
+    accessibilityState: { selected: active === channel },
+    onFocus: () => setActive(channel),
+    onHoverIn: () => setActive(channel),
+    onPressIn: () => setActive(channel),
+  });
+
+  return (
+    <View style={[styles.signalConsole, compact && styles.signalConsoleCompact]}>
+      <View style={styles.signalHeader}>
+        <Text style={styles.signalHeaderLabel}>ROUTE SELECTOR / MOVE CURSOR</Text>
+        <View style={styles.waveform} accessibilityElementsHidden>
+          {wave.map((height, index) => (
+            <View
+              key={index}
+              style={[
+                styles.waveBar,
+                { height, backgroundColor: isContact ? colors.cyan : colors.acid },
+              ]}
+            />
+          ))}
+        </View>
+        <Text style={[styles.signalStatus, isContact && styles.signalStatusContact]}>
+          {isContact ? 'MAIL_LINK / CHANNEL OPEN' : 'ARCHIVE_04 / SIGNAL LOCKED'}
+        </Text>
+      </View>
+
+      <View
+        style={styles.signalTrack}
+        onLayout={(event) => setTrackWidth(event.nativeEvent.layout.width)}
+      >
+        {trackWidth > 0 ? (
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.signalCursor,
+              {
+                width: trackWidth / 2,
+                backgroundColor: isContact ? colors.cyan : colors.acid,
+                transform: [{ translateX: cursorX }],
+              },
+            ]}
+          >
+            <View style={styles.cursorNotch} />
+          </Animated.View>
+        ) : null}
+
+        <Pressable
+          {...channelProps('work')}
+          accessibilityLabel="Descender al archivo de proyectos"
+          onPress={onWork}
+          style={({ pressed }) => [styles.signalOption, pressed && styles.signalOptionPressed]}
+        >
+          <Text style={[styles.signalIndex, !isContact && styles.signalTextActive]}>01</Text>
+          <View style={styles.signalOptionCopy}>
+            <Text style={[styles.signalVerb, !isContact && styles.signalTextActive]}>DESCENDER</Text>
+            <Text style={[styles.signalTarget, !isContact && styles.signalTextActive]}>ARCHIVO</Text>
+          </View>
+          <Text style={[styles.signalLaunch, !isContact && styles.signalTextActive]}>↓</Text>
+        </Pressable>
+
+        <Pressable
+          {...channelProps('contact')}
+          accessibilityLabel="Abrir un correo para contactar a Anderson"
+          onPress={onContact}
+          style={({ pressed }) => [styles.signalOption, styles.signalOptionSecond, pressed && styles.signalOptionPressed]}
+        >
+          <Text style={[styles.signalIndex, isContact && styles.signalTextActive]}>02</Text>
+          <View style={styles.signalOptionCopy}>
+            <Text style={[styles.signalVerb, isContact && styles.signalTextActive]}>TRANSMITIR</Text>
+            <Text style={[styles.signalTarget, isContact && styles.signalTextActive]}>SEÑAL</Text>
+          </View>
+          <Text style={[styles.signalLaunch, isContact && styles.signalTextActive]}>↗</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
 
 export default function PortfolioHero({ compact, onWork, email }) {
   const sendEmail = () => Linking.openURL(`mailto:${email}`);
@@ -74,10 +174,7 @@ export default function PortfolioHero({ compact, onWork, email }) {
             <Text style={styles.sideNote}>CLARIDAD{`\n`}× CARÁCTER{`\n`}× CÓDIGO</Text>
           </View>
 
-          <View style={styles.actions}>
-            <Action onPress={onWork} label="Ver proyectos seleccionados">VER PROYECTOS</Action>
-            <Action onPress={sendEmail} label="Escribir a Anderson" inverted>HABLEMOS</Action>
-          </View>
+          <SignalSelector onWork={onWork} onContact={sendEmail} compact={compact} />
         </View>
 
         <View style={[styles.visual, compact && styles.visualCompact]}>
@@ -178,12 +275,64 @@ const styles = StyleSheet.create({
   introRowCompact: { flexDirection: 'column', alignItems: 'flex-start', gap: 18 },
   intro: { flex: 1, maxWidth: 510, color: '#d7d6dc', fontFamily: fonts.sans, fontSize: 17, lineHeight: 25 },
   sideNote: { color: colors.cyan, fontFamily: fonts.mono, fontSize: 8, lineHeight: 14, letterSpacing: 1 },
-  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 28 },
-  action: { minHeight: 48, flexDirection: 'row', alignItems: 'center', gap: 18, paddingHorizontal: 18, backgroundColor: colors.ink, borderWidth: 1, borderColor: colors.paper },
-  actionInverted: { backgroundColor: colors.paper },
-  actionActive: { transform: [{ translateY: -2 }], borderColor: colors.acid },
-  actionText: { color: colors.paper, fontFamily: fonts.mono, fontSize: 9, fontWeight: '700', letterSpacing: 1 },
-  actionTextInverted: { color: colors.ink },
+  signalConsole: { width: '100%', maxWidth: 590, marginTop: 28 },
+  signalConsoleCompact: { maxWidth: 560 },
+  signalHeader: {
+    minHeight: 27,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 9,
+    borderWidth: 1,
+    borderBottomWidth: 0,
+    borderColor: '#4a4952',
+  },
+  signalHeaderLabel: { color: colors.fog, fontFamily: fonts.mono, fontSize: 6, fontWeight: '700', letterSpacing: 0.8 },
+  waveform: { flex: 1, height: 22, marginHorizontal: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 3 },
+  waveBar: { width: 2 },
+  signalStatus: { color: colors.acid, fontFamily: fonts.mono, fontSize: 6, fontWeight: '700', letterSpacing: 0.65, textAlign: 'right' },
+  signalStatusContact: { color: colors.cyan },
+  signalTrack: {
+    minHeight: 76,
+    flexDirection: 'row',
+    position: 'relative',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.paper,
+  },
+  signalCursor: { position: 'absolute', left: 0, top: 0, bottom: 0 },
+  cursorNotch: {
+    position: 'absolute',
+    right: -1,
+    top: 0,
+    width: 14,
+    height: 14,
+    borderTopWidth: 7,
+    borderRightWidth: 7,
+    borderBottomWidth: 7,
+    borderLeftWidth: 7,
+    borderTopColor: colors.ink,
+    borderRightColor: colors.ink,
+    borderBottomColor: 'transparent',
+    borderLeftColor: 'transparent',
+  },
+  signalOption: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 74,
+    zIndex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 11,
+    paddingHorizontal: 14,
+  },
+  signalOptionSecond: { borderLeftWidth: 1, borderLeftColor: colors.paper },
+  signalOptionPressed: { opacity: 0.72 },
+  signalIndex: { color: colors.fog, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', alignSelf: 'flex-start', marginTop: 18 },
+  signalOptionCopy: { flex: 1 },
+  signalVerb: { color: colors.fog, fontFamily: fonts.mono, fontSize: 6, fontWeight: '700', letterSpacing: 1.1 },
+  signalTarget: { marginTop: 3, color: colors.paper, fontFamily: fonts.display, fontSize: 17, fontWeight: '900', letterSpacing: -0.4 },
+  signalLaunch: { color: colors.paper, fontFamily: fonts.sans, fontSize: 19, fontWeight: '700' },
+  signalTextActive: { color: colors.ink },
   visual: { flex: 0.92, minWidth: 0, position: 'relative', overflow: 'hidden', borderLeftWidth: 1, borderLeftColor: '#34343c' },
   visualCompact: { minHeight: 560, borderLeftWidth: 0, borderTopWidth: 1, borderTopColor: '#34343c' },
   visualImage: { width: '100%', height: '100%' },
@@ -200,4 +349,3 @@ const styles = StyleSheet.create({
   railText: { color: colors.ink, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700', letterSpacing: 1 },
   railStar: { color: colors.violet, fontSize: 13 },
 });
-
