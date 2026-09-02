@@ -8,7 +8,6 @@ import { colors } from '../src/design/tokens';
 const routes = {
   work: '/misiones',
   loadout: '/loadout',
-  lab: '/signal-lab',
   profile: '/perfil',
   contact: '/contacto',
 };

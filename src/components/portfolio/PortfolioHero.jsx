@@ -17,28 +17,17 @@ const menuItems = [
   {
     key: 'loadout',
     index: '02',
-    command: 'LOADOUT',
-    target: 'MÉTODO + SISTEMA',
-    code: 'BUILD_SYSTEM / EQUIPPED',
-    description: 'Producto, dirección visual y arquitectura trabajando juntos.',
+    command: 'LOADOUT + LAB',
+    target: 'SISTEMA + EXPERIMENTOS',
+    code: 'BUILD_SYSTEM / VISUAL R&D',
+    description: 'Cómo construyo, qué utilizo y dónde experimento con la forma.',
     accent: colors.violet,
     foreground: colors.paper,
     source: require('../../../assets/editorial/signal-kit.jpg'),
   },
   {
-    key: 'lab',
-    index: '03',
-    command: 'SIGNAL LAB',
-    target: 'ARCHIVO VISUAL',
-    code: 'RESEARCH_MODE / ONLINE',
-    description: 'Texturas, señales y reglas para construir una piel propia.',
-    accent: colors.cyan,
-    foreground: colors.ink,
-    source: require('../../../assets/editorial/chroma-knot.jpg'),
-  },
-  {
     key: 'profile',
-    index: '04',
+    index: '03',
     command: 'PLAYER FILE',
     target: 'ANDERSON SOLANO',
     code: 'PROFILE_01 / COSTA RICA',
@@ -49,7 +38,7 @@ const menuItems = [
   },
   {
     key: 'contact',
-    index: '05',
+    index: '04',
     command: 'OPEN CHANNEL',
     target: 'NUEVA PARTIDA',
     code: 'COMMS_LINK / AVAILABLE',
@@ -221,7 +210,7 @@ export default function PortfolioHero({ compact, mobile, onNavigate }) {
         {!compact ? (
           <View style={styles.navLinks}>
             <Pressable onPress={() => onNavigate('work')} accessibilityRole="link"><Text style={styles.navLink}>01 / MISIONES</Text></Pressable>
-            <Pressable onPress={() => onNavigate('contact')} accessibilityRole="link"><Text style={styles.navLink}>05 / CONTACTO</Text></Pressable>
+            <Pressable onPress={() => onNavigate('contact')} accessibilityRole="link"><Text style={styles.navLink}>04 / CONTACTO</Text></Pressable>
           </View>
         ) : null}
 
