@@ -29,7 +29,7 @@ function ProjectSlide({ caso, variant, compact, onPress }) {
         </View>
         <View style={[styles.metricStamp, { backgroundColor: scheme.accent }]}>
           <Text style={[styles.metricStampValue, { color: scheme.ink }]}>{caso.metrica}</Text>
-          <Text style={[styles.metricStampLabel, { color: scheme.ink }]}>PROJECT SIGNAL</Text>
+          <Text style={[styles.metricStampLabel, { color: scheme.ink }]}>MISSION SIGNAL</Text>
         </View>
       </Pressable>
     );
@@ -87,7 +87,7 @@ function ProjectSlide({ caso, variant, compact, onPress }) {
         </View>
       </View>
       <View style={styles.systemFooter}>
-        <Text style={styles.systemFooterText}>OPEN CASE STUDY</Text>
+        <Text style={styles.systemFooterText}>OPEN MISSION BRIEF</Text>
         <Text style={styles.systemFooterText}>{caso.indice} — {caso.metrica}</Text>
       </View>
     </Pressable>
@@ -103,12 +103,12 @@ export default function ProjectArchive({ compact }) {
     <View style={styles.section}>
       <View style={[styles.heading, compact && styles.headingCompact]}>
         <View>
-          <Text style={styles.kicker}>[01] / SELECTED WORK DECK</Text>
-          <Text style={[styles.headingTitle, compact && styles.headingTitleCompact]}>CUATRO CASOS.{`\n`}CUATRO FORMAS{`\n`}DE ORDENAR EL RUIDO.</Text>
+          <Text style={styles.kicker}>[01] / MISSION SELECT / 04 ACTIVE</Text>
+          <Text style={[styles.headingTitle, compact && styles.headingTitleCompact]}>ELIGE UNA{`\n`}SEÑAL PARA{`\n`}DESBLOQUEAR.</Text>
         </View>
         <View style={styles.headingAside}>
           <Text style={styles.headingCount}>04</Text>
-          <Text style={styles.headingNote}>NO ES UNA LISTA DE REPOSITORIOS.{`\n`}ES UNA SECUENCIA DE DECISIONES.</Text>
+          <Text style={styles.headingNote}>CADA MISIÓN CONTIENE UN PROBLEMA,{`\n`}UN SISTEMA Y DECISIONES REALES.</Text>
         </View>
       </View>
 

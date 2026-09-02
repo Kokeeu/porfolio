@@ -13,10 +13,24 @@ const LINKEDIN = 'https://www.linkedin.com/in/anderson-solano-chavarria-75a5763b
 export default function HomePage() {
   const scrollRef = useRef(null);
   const projectsY = useRef(0);
+  const loadoutY = useRef(0);
+  const labY = useRef(0);
+  const profileY = useRef(0);
+  const contactY = useRef(0);
   const { width } = useWindowDimensions();
   const compact = width < 920;
+  const mobile = width < 560;
 
-  const goToWork = () => scrollRef.current?.scrollTo({ y: projectsY.current, animated: true });
+  const navigate = (destination) => {
+    const targets = {
+      work: projectsY,
+      loadout: loadoutY,
+      lab: labY,
+      profile: profileY,
+      contact: contactY,
+    };
+    scrollRef.current?.scrollTo({ y: targets[destination]?.current || 0, animated: true });
+  };
 
   return (
     <View style={styles.page}>
@@ -29,14 +43,14 @@ export default function HomePage() {
       </Head>
       <StatusBar style="light" />
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <PortfolioHero compact={compact} onWork={goToWork} email={EMAIL} />
+        <PortfolioHero compact={compact} mobile={mobile} onNavigate={navigate} />
         <View onLayout={(event) => { projectsY.current = event.nativeEvent.layout.y; }}>
           <ProjectArchive compact={compact} />
         </View>
-        <Manifesto compact={compact} />
-        <VisualLab compact={compact} />
-        <About compact={compact} />
-        <Contact compact={compact} email={EMAIL} linkedin={LINKEDIN} />
+        <View onLayout={(event) => { loadoutY.current = event.nativeEvent.layout.y; }}><Manifesto compact={compact} /></View>
+        <View onLayout={(event) => { labY.current = event.nativeEvent.layout.y; }}><VisualLab compact={compact} /></View>
+        <View onLayout={(event) => { profileY.current = event.nativeEvent.layout.y; }}><About compact={compact} /></View>
+        <View onLayout={(event) => { contactY.current = event.nativeEvent.layout.y; }}><Contact compact={compact} email={EMAIL} linkedin={LINKEDIN} /></View>
       </ScrollView>
     </View>
   );
