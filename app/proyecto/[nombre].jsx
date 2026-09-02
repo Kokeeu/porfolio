@@ -47,7 +47,7 @@ export default function ProjectPage() {
       <View style={styles.notFound}>
         <Text style={styles.notFoundCode}>404</Text>
         <Text style={styles.notFoundText}>ESTE CASO NO EXISTE EN EL ARCHIVO.</Text>
-        <ProjectLink label="VOLVER AL INICIO" onPress={() => router.replace('/')} />
+        <ProjectLink label="VOLVER AL MENÚ" onPress={() => router.replace('/')} />
       </View>
     );
   }
@@ -68,10 +68,10 @@ export default function ProjectPage() {
       <StatusBar style="light" />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.topbar}>
-          <NavAction label="VOLVER" icon="arrow-back" onPress={() => router.replace('/')} />
+          <NavAction label="VOLVER A MISIONES" icon="arrow-back" onPress={() => router.replace('/misiones')} />
           <View style={styles.brand}>
             <Text style={styles.brandMark}>AS</Text>
-            <Text style={styles.brandText}>PROJECT ARCHIVE / {caso.indice}</Text>
+            <Text style={styles.brandText}>MISSION BRIEF / {caso.indice}</Text>
           </View>
           <NavAction label="GITHUB" icon="logo-github" onPress={() => Linking.openURL(githubUrl)} />
         </View>
@@ -96,7 +96,7 @@ export default function ProjectPage() {
         <View style={[styles.metrics, compact && styles.metricsCompact]}>
           <Metric value={caso.metrica} label={caso.etiquetaMetrica} accent={scheme.accent} />
           <Metric value={caso.stack.length.toString().padStart(2, '0')} label="PIEZAS DEL STACK" accent={scheme.accent} />
-          <Metric value={caso.indice} label="CASO EN EL ARCHIVO" accent={scheme.accent} />
+          <Metric value={caso.indice} label="MISIÓN EN EL ARCHIVO" accent={scheme.accent} />
         </View>
 
         <View style={[styles.story, compact && styles.storyCompact]}>
@@ -152,7 +152,7 @@ export default function ProjectPage() {
 
         <Pressable accessibilityRole="link" accessibilityLabel={`Siguiente caso: ${next.titulo}`} onPress={() => router.push({ pathname: '/proyecto/[nombre]', params: { nombre: next.repo } })} style={({ pressed }) => [styles.next, { backgroundColor: scheme.accent }, pressed && styles.nextPressed]}>
           <View>
-            <Text style={[styles.nextKicker, { color: scheme.ink }]}>SIGUIENTE CASO / {next.indice}</Text>
+            <Text style={[styles.nextKicker, { color: scheme.ink }]}>SIGUIENTE MISIÓN / {next.indice}</Text>
             <Text style={[styles.nextTitle, compact && styles.nextTitleCompact, { color: scheme.ink }]}>{next.titulo.toUpperCase()}</Text>
           </View>
           <View style={[styles.nextArrow, { borderColor: scheme.ink }]}><Ionicons name="arrow-forward" size={34} color={scheme.ink} /></View>
