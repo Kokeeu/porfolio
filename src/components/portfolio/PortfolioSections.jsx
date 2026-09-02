@@ -80,9 +80,14 @@ export function About({ compact }) {
   );
 }
 
-const ContactLink = ({ label, onPress }) => (
-  <Pressable accessibilityRole="link" onPress={onPress} style={({ pressed, hovered }) => [styles.contactLink, (pressed || hovered) && styles.contactLinkActive]}>
-    <Text style={styles.contactLinkText}>{label}</Text>
+const ContactLink = ({ icon, label, onPress }) => (
+  <Pressable accessibilityRole="link" accessibilityLabel={`Abrir ${label}`} onPress={onPress} style={({ pressed, hovered }) => [styles.contactLink, (pressed || hovered) && styles.contactLinkActive]}>
+    <View style={styles.contactLinkLead}>
+      <View style={styles.contactIconFrame}>
+        <Ionicons name={icon} size={17} color={colors.ink} />
+      </View>
+      <Text style={styles.contactLinkText}>{label}</Text>
+    </View>
     <Ionicons name="arrow-up" size={21} color={colors.ink} style={styles.contactArrow} />
   </Pressable>
 );
@@ -95,9 +100,9 @@ export function Contact({ compact, email, linkedin }) {
       <View style={[styles.contactBottom, compact && styles.contactBottomCompact]}>
         <Text style={styles.contactNote}>Disponible para proyectos, productos digitales y colaboraciones donde diseño y código tengan el mismo peso.</Text>
         <View style={styles.contactLinks}>
-          <ContactLink label="EMAIL" onPress={() => Linking.openURL(`mailto:${email}`)} />
-          <ContactLink label="LINKEDIN" onPress={() => Linking.openURL(linkedin)} />
-          <ContactLink label="GITHUB" onPress={() => Linking.openURL('https://github.com/Kokeeu')} />
+          <ContactLink icon="mail-outline" label="EMAIL" onPress={() => Linking.openURL(`mailto:${email}`)} />
+          <ContactLink icon="logo-linkedin" label="LINKEDIN" onPress={() => Linking.openURL(linkedin)} />
+          <ContactLink icon="logo-github" label="GITHUB" onPress={() => Linking.openURL('https://github.com/Kokeeu')} />
         </View>
       </View>
       <View style={styles.footer}>
@@ -167,6 +172,8 @@ const styles = StyleSheet.create({
   contactLinks: { flex: 1, borderTopWidth: 1, borderTopColor: colors.ink },
   contactLink: { minHeight: 58, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderBottomColor: colors.ink },
   contactLinkActive: { paddingHorizontal: 10, backgroundColor: colors.paper },
+  contactLinkLead: { flexDirection: 'row', alignItems: 'center', gap: 13 },
+  contactIconFrame: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: colors.ink },
   contactLinkText: { color: colors.ink, fontFamily: fonts.display, fontSize: 18, fontWeight: '900' },
   contactArrow: { transform: [{ rotate: '45deg' }] },
   footer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, marginTop: 70, paddingTop: 18, borderTopWidth: 1, borderTopColor: colors.ink },
