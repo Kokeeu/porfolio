@@ -1,9 +1,10 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { obtenerCasos } from '../../../data/proyectos';
 import { colors, fonts, layout } from '../../design/tokens';
 import { getProjectImage, getProjectScheme } from './CaseVisual';
+import { useGameTransition } from './GameTransition';
+import MascotSticker from './MascotSticker';
 
 const SlideMeta = ({ caso, dark = false }) => (
   <View style={styles.slideMeta}>
@@ -95,9 +96,9 @@ function ProjectSlide({ caso, variant, compact, onPress }) {
 }
 
 export default function ProjectArchive({ compact }) {
-  const router = useRouter();
+  const { navigate } = useGameTransition();
   const projects = obtenerCasos();
-  const openProject = (repo) => router.push({ pathname: '/proyecto/[nombre]', params: { nombre: repo } });
+  const openProject = (repo, index) => navigate({ pathname: '/proyecto/[nombre]', params: { nombre: repo } }, { label: index });
 
   return (
     <View style={styles.section}>
@@ -107,6 +108,7 @@ export default function ProjectArchive({ compact }) {
           <Text style={[styles.headingTitle, compact && styles.headingTitleCompact]}>ELIGE UNA{`\n`}SEÑAL PARA{`\n`}DESBLOQUEAR.</Text>
         </View>
         <View style={styles.headingAside}>
+          <MascotSticker index={0} size={compact ? 118 : 156} label="Mascota zorro original de la ruta Misiones" style={styles.missionMascot} />
           <Text style={styles.headingCount}>04</Text>
           <Text style={styles.headingNote}>CADA MISIÓN CONTIENE UN PROBLEMA,{`\n`}UN SISTEMA Y DECISIONES REALES.</Text>
         </View>
@@ -114,12 +116,12 @@ export default function ProjectArchive({ compact }) {
 
       <View style={[styles.deck, compact && styles.deckCompact]}>
         <View style={[styles.deckRow, compact && styles.deckRowCompact]}>
-          <View style={styles.deckLead}><ProjectSlide caso={projects[0]} variant="lead" compact={compact} onPress={() => openProject(projects[0].repo)} /></View>
-          <View style={styles.deckSide}><ProjectSlide caso={projects[1]} variant="data" compact={compact} onPress={() => openProject(projects[1].repo)} /></View>
+          <View style={styles.deckLead}><ProjectSlide caso={projects[0]} variant="lead" compact={compact} onPress={() => openProject(projects[0].repo, projects[0].indice)} /></View>
+          <View style={styles.deckSide}><ProjectSlide caso={projects[1]} variant="data" compact={compact} onPress={() => openProject(projects[1].repo, projects[1].indice)} /></View>
         </View>
         <View style={[styles.deckRow, styles.deckRowBottom, compact && styles.deckRowCompact]}>
-          <View style={styles.deckQuote}><ProjectSlide caso={projects[2]} variant="quote" compact={compact} onPress={() => openProject(projects[2].repo)} /></View>
-          <View style={styles.deckSystem}><ProjectSlide caso={projects[3]} variant="system" compact={compact} onPress={() => openProject(projects[3].repo)} /></View>
+          <View style={styles.deckQuote}><ProjectSlide caso={projects[2]} variant="quote" compact={compact} onPress={() => openProject(projects[2].repo, projects[2].indice)} /></View>
+          <View style={styles.deckSystem}><ProjectSlide caso={projects[3]} variant="system" compact={compact} onPress={() => openProject(projects[3].repo, projects[3].indice)} /></View>
         </View>
       </View>
     </View>
@@ -131,9 +133,10 @@ const styles = StyleSheet.create({
   heading: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, paddingHorizontal: layout.gutter, marginBottom: 52 },
   headingCompact: { flexDirection: 'column', alignItems: 'flex-start', paddingHorizontal: layout.mobileGutter, marginBottom: 34 },
   kicker: { color: colors.acid, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700', letterSpacing: 1.1 },
-  headingTitle: { marginTop: 16, color: colors.paper, fontFamily: fonts.display, fontSize: 61, lineHeight: 59, fontWeight: '900', letterSpacing: -3.4 },
-  headingTitleCompact: { fontSize: 41, lineHeight: 41, letterSpacing: -2.4 },
+  headingTitle: { marginTop: 16, color: colors.paper, fontFamily: fonts.display, fontSize: 71, lineHeight: 66, fontWeight: '900', letterSpacing: -1.5 },
+  headingTitleCompact: { fontSize: 47, lineHeight: 45, letterSpacing: -1 },
   headingAside: { alignItems: 'flex-end', gap: 10 },
+  missionMascot: { marginBottom: -56, marginRight: 66, zIndex: 2, transform: [{ rotate: '7deg' }] },
   headingCount: { color: colors.violet, fontFamily: fonts.display, fontSize: 70, lineHeight: 68, fontWeight: '900' },
   headingNote: { maxWidth: 280, color: colors.fog, fontFamily: fonts.mono, fontSize: 8, lineHeight: 15, letterSpacing: 0.7, textAlign: 'right' },
   deck: { paddingHorizontal: layout.gutter, gap: 12 },
@@ -145,16 +148,16 @@ const styles = StyleSheet.create({
   deckSide: { flex: 0.75 },
   deckQuote: { flex: 0.82 },
   deckSystem: { flex: 1.18 },
-  slide: { flex: 1, minHeight: 460, position: 'relative', overflow: 'hidden', borderWidth: 1, borderColor: '#555560' },
+  slide: { flex: 1, minHeight: 460, position: 'relative', overflow: 'hidden', borderWidth: 1, borderColor: colors.navy },
   slideActive: { transform: [{ translateY: -4 }], borderColor: colors.acid },
-  leadSlide: { backgroundColor: '#111116' },
-  fullImage: { width: '100%', height: '100%', backgroundColor: '#111116' },
-  leadShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(2,2,5,0.18)' },
+  leadSlide: { backgroundColor: colors.navy },
+  fullImage: { width: '100%', height: '100%', backgroundColor: colors.navy },
+  leadShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(7,13,27,0.2)' },
   leadFrame: { position: 'absolute', left: 18, right: 18, top: 18, bottom: 18, borderWidth: 1, borderColor: 'rgba(242,241,236,0.7)' },
   slideMeta: { position: 'absolute', zIndex: 3, left: 20, right: 20, top: 19, flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
   slideMetaText: { color: colors.paper, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 0.8 },
   slideMetaDark: { color: colors.ink },
-  leadCopy: { position: 'absolute', left: 19, right: 19, bottom: 18, padding: 22, backgroundColor: 'rgba(5,5,7,0.94)' },
+  leadCopy: { position: 'absolute', left: 19, right: 19, bottom: 18, padding: 22, backgroundColor: 'rgba(7,13,27,0.95)' },
   leadTitle: { color: colors.paper, fontFamily: fonts.display, fontSize: 50, lineHeight: 49, fontWeight: '900', letterSpacing: -2.8 },
   leadPhrase: { maxWidth: 560, marginTop: 10, color: colors.fog, fontFamily: fonts.serif, fontSize: 18, lineHeight: 24, fontStyle: 'italic' },
   metricStamp: { position: 'absolute', right: 32, top: 52, width: 92, height: 92, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '4deg' }] },
@@ -176,13 +179,13 @@ const styles = StyleSheet.create({
   quoteVisual: { position: 'absolute', right: -16, top: 92, width: '39%', height: '54%', overflow: 'hidden', borderWidth: 1, borderColor: colors.ink, transform: [{ rotate: '4deg' }] },
   quoteFooter: { position: 'absolute', left: 24, right: 24, bottom: 22, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 14, borderTopWidth: 1, borderTopColor: colors.ink },
   quoteTitle: { fontFamily: fonts.mono, fontSize: 9, fontWeight: '700', letterSpacing: 0.9 },
-  systemSlide: { padding: 20, backgroundColor: '#0c0c10' },
+  systemSlide: { padding: 20, backgroundColor: colors.ink },
   systemGrid: { flex: 1, flexDirection: 'row', gap: 18, marginTop: 38, marginBottom: 52 },
   systemCopy: { flex: 1, justifyContent: 'center' },
   systemTitle: { color: colors.paper, fontFamily: fonts.display, fontSize: 38, lineHeight: 38, fontWeight: '900', letterSpacing: -2 },
   systemPhrase: { marginTop: 14, color: colors.fog, fontFamily: fonts.serif, fontSize: 17, lineHeight: 23, fontStyle: 'italic' },
   stackRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 24 },
-  stackTag: { paddingHorizontal: 7, paddingVertical: 5, color: colors.cyan, fontFamily: fonts.mono, fontSize: 6, fontWeight: '700', borderWidth: 1, borderColor: '#44444e' },
+  stackTag: { paddingHorizontal: 7, paddingVertical: 5, color: colors.cyan, fontFamily: fonts.mono, fontSize: 6, fontWeight: '700', borderWidth: 1, borderColor: colors.navy },
   systemVisual: { flex: 0.78, position: 'relative', overflow: 'hidden', borderWidth: 1, borderColor: colors.paper },
   systemTarget: { position: 'absolute', left: '50%', top: '50%', width: 56, height: 56, alignItems: 'center', justifyContent: 'center', marginLeft: -28, marginTop: -28, borderRadius: 30, backgroundColor: colors.acid },
   systemTargetText: { color: colors.ink, fontSize: 28 },

@@ -48,16 +48,16 @@ export default function CaseVisual({ caso, compact = false, hero = false }) {
 }
 
 const styles = StyleSheet.create({
-  frame: { minHeight: 620, position: 'relative', overflow: 'hidden', backgroundColor: '#17171d', borderWidth: 1, borderColor: '#3c3c44' },
+  frame: { minHeight: 620, position: 'relative', overflow: 'hidden', backgroundColor: colors.navy, borderWidth: 1, borderColor: colors.blue },
   frameCompact: { minHeight: 430 },
   frameHero: { minHeight: 720 },
-  image: { width: '100%', height: '100%', backgroundColor: '#111116' },
-  shade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(3,3,6,0.14)' },
+  image: { width: '100%', height: '100%', backgroundColor: colors.navy },
+  shade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(7,13,27,0.14)' },
   metaTop: { position: 'absolute', left: 16, right: 16, top: 15, flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
   metaLight: { color: colors.paper, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 0.8 },
   indexBlock: { position: 'absolute', right: 16, top: 44, width: 72, height: 72, alignItems: 'center', justifyContent: 'center' },
   index: { fontFamily: fonts.display, fontSize: 29, fontWeight: '900' },
-  caption: { position: 'absolute', left: 16, right: 16, bottom: 16, padding: 16, backgroundColor: 'rgba(5,5,7,0.92)', borderWidth: 1, borderColor: '#777781' },
+  caption: { position: 'absolute', left: 16, right: 16, bottom: 16, padding: 16, backgroundColor: 'rgba(7,13,27,0.94)', borderWidth: 1, borderColor: colors.lavender },
   captionTitle: { color: colors.paper, fontFamily: fonts.display, fontSize: 25, fontWeight: '900', letterSpacing: -1 },
   captionRole: { marginTop: 6, color: colors.cyan, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 1 },
   signal: { position: 'absolute', left: 0, top: '43%', width: 44, height: 4 },

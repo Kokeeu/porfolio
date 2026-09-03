@@ -1,14 +1,17 @@
 import { Stack } from 'expo-router';
 import { Platform } from 'react-native';
+import { GameTransitionProvider } from '../src/components/portfolio/GameTransition';
 
 export default function RootLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        animation: Platform.OS === 'web' ? 'none' : 'fade',
-        contentStyle: { backgroundColor: '#050507' },
-      }}
-    />
+    <GameTransitionProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: Platform.OS === 'web' ? 'none' : 'fade',
+          contentStyle: { backgroundColor: '#070d1b' },
+        }}
+      />
+    </GameTransitionProvider>
   );
 }

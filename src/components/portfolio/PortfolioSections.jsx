@@ -1,6 +1,7 @@
 import { Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, fonts, layout } from '../../design/tokens';
+import MascotSticker from './MascotSticker';
 
 const CapabilityRow = ({ index, title, detail }) => (
   <View style={styles.capabilityRow}>
@@ -14,7 +15,8 @@ export function Manifesto({ compact }) {
   return (
     <View style={[styles.manifesto, compact && styles.manifestoCompact]}>
       <View style={styles.manifestoLead}>
-        <Text style={styles.sectionKicker}>[02] / PRINCIPIO DE TRABAJO</Text>
+        <MascotSticker index={1} size={compact ? 112 : 150} label="Mascota salamandra original" style={styles.manifestoMascot} />
+        <Text style={styles.sectionKicker}>[02.A] / BUILD SYSTEM</Text>
         <Text style={[styles.manifestoTitle, compact && styles.manifestoTitleCompact]}>
           LO DIGITAL NO TIENE QUE SENTIRSE <Text style={styles.manifestoItalic}>DESECHABLE.</Text>
         </Text>
@@ -43,14 +45,15 @@ export function VisualLab({ compact }) {
   return (
     <View style={[styles.lab, compact && styles.labCompact]}>
       <View style={styles.labIntro}>
-        <Text style={styles.labKicker}>[03] / VISUAL RESEARCH / 03 FRAGMENTS</Text>
+        <Text style={styles.labKicker}>[02.B] / SIGNAL LAB / 03 FRAGMENTS</Text>
         <Text style={[styles.labTitle, compact && styles.labTitleCompact]}>UN SISTEMA{`\n`}QUE PUEDE{`\n`}CAMBIAR DE PIEL.</Text>
         <Text style={styles.labCopy}>El archivo visual no es decoración: funciona como tensión entre orden técnico, ruido, textura y luz.</Text>
+        <MascotSticker index={1} size={compact ? 124 : 164} label="Mascota salamandra original explorando el laboratorio visual" style={styles.labMascot} />
       </View>
       <View style={[styles.labCanvas, compact && styles.labCanvasCompact]}>
-        <LabTile source={require('../../../assets/editorial/chroma-knot.jpg')} label="A / CHROMA" style={styles.labTileA} />
-        <LabTile source={require('../../../assets/editorial/signal-kit.jpg')} label="B / SIGNAL KIT" style={styles.labTileB} />
-        <LabTile source={require('../../../assets/editorial/signal-eye.jpg')} label="C / SIGNAL" style={styles.labTileC} />
+        <LabTile source={require('../../../assets/editorial/shape-atlas.jpg')} label="A / SHAPE ATLAS" style={styles.labTileA} />
+        <LabTile source={require('../../../assets/editorial/future-poster.jpg')} label="B / TYPE SYSTEM" style={styles.labTileB} />
+        <LabTile source={require('../../../assets/editorial/signal-kit.jpg')} label="C / SIGNAL KIT" style={styles.labTileC} />
         <View style={styles.labCross}><Text style={styles.labCrossText}>＋</Text></View>
         <Text style={styles.labAnnotation}>ESTRUCTURA{`\n`}ANTES QUE EFECTO →</Text>
       </View>
@@ -66,7 +69,8 @@ export function About({ compact }) {
         <View style={styles.aboutIndex}><Text style={styles.aboutIndexText}>AS / 26</Text></View>
       </View>
       <View style={styles.aboutCopyWrap}>
-        <Text style={styles.aboutKicker}>[04] / SOBRE MÍ</Text>
+        <MascotSticker index={2} size={compact ? 116 : 154} label="Mascota nutria original del perfil" style={styles.aboutMascot} />
+        <Text style={styles.aboutKicker}>[03] / PLAYER FILE</Text>
         <Text style={[styles.aboutTitle, compact && styles.aboutTitleCompact]}>DESARROLLO{`\n`}CON CRITERIO{`\n`}VISUAL.</Text>
         <Text style={styles.aboutCopy}>Soy Anderson Solano, desarrollador frontend en Costa Rica. Me interesan los productos donde la experiencia, el movimiento y la implementación forman una sola conversación.</Text>
         <Text style={styles.aboutQuote}>“La rareza sirve cuando también mejora la lectura.”</Text>
@@ -95,6 +99,7 @@ const ContactLink = ({ icon, label, onPress }) => (
 export function Contact({ compact, email, linkedin }) {
   return (
     <View style={styles.contact}>
+      <MascotSticker index={3} size={compact ? 128 : 190} label="Mascota gato espectral original de contacto" style={styles.contactMascot} />
       <Text style={styles.contactKicker}>¿TIENES UNA IDEA QUE MERECE UNA FORMA PROPIA?</Text>
       <Text style={[styles.contactTitle, compact && styles.contactTitleCompact]}>HAGAMOS{`\n`}QUE EMITA{`\n`}SEÑAL.</Text>
       <View style={[styles.contactBottom, compact && styles.contactBottomCompact]}>
@@ -116,25 +121,27 @@ export function Contact({ compact, email, linkedin }) {
 const styles = StyleSheet.create({
   manifesto: { width: '100%', maxWidth: layout.max, alignSelf: 'center', flexDirection: 'row', gap: 70, paddingHorizontal: layout.gutter, paddingVertical: 120, backgroundColor: colors.paper },
   manifestoCompact: { flexDirection: 'column', gap: 48, paddingHorizontal: layout.mobileGutter, paddingVertical: 82 },
-  manifestoLead: { flex: 1.15 },
+  manifestoLead: { flex: 1.15, position: 'relative' },
+  manifestoMascot: { position: 'absolute', right: 0, top: -68, transform: [{ rotate: '8deg' }] },
   sectionKicker: { color: colors.ink, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700', letterSpacing: 1 },
-  manifestoTitle: { marginTop: 20, color: colors.ink, fontFamily: fonts.display, fontSize: 62, lineHeight: 63, fontWeight: '900', letterSpacing: -3.5 },
-  manifestoTitleCompact: { fontSize: 42, lineHeight: 44, letterSpacing: -2.3 },
+  manifestoTitle: { marginTop: 20, color: colors.ink, fontFamily: fonts.display, fontSize: 70, lineHeight: 67, fontWeight: '900', letterSpacing: -1 },
+  manifestoTitleCompact: { fontSize: 46, lineHeight: 44, letterSpacing: -0.5 },
   manifestoItalic: { color: colors.violet, fontFamily: fonts.serif, fontStyle: 'italic', fontWeight: '400' },
   manifestoBody: { flex: 0.85 },
-  manifestoCopy: { maxWidth: 560, color: '#313137', fontFamily: fonts.sans, fontSize: 18, lineHeight: 27 },
+  manifestoCopy: { maxWidth: 560, color: colors.navy, fontFamily: fonts.sans, fontSize: 18, lineHeight: 27 },
   capabilities: { marginTop: 42, borderTopWidth: 1, borderTopColor: colors.ink },
   capabilityRow: { minHeight: 66, flexDirection: 'row', alignItems: 'center', gap: 16, borderBottomWidth: 1, borderBottomColor: colors.ink },
   capabilityIndex: { width: 24, color: colors.violet, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700' },
   capabilityTitle: { flex: 0.8, color: colors.ink, fontFamily: fonts.display, fontSize: 15, fontWeight: '900' },
-  capabilityDetail: { flex: 1.2, color: '#4d4d54', fontFamily: fonts.mono, fontSize: 8, lineHeight: 13 },
+  capabilityDetail: { flex: 1.2, color: colors.navy, fontFamily: fonts.mono, fontSize: 8, lineHeight: 13 },
   lab: { width: '100%', maxWidth: layout.max, minHeight: 800, alignSelf: 'center', flexDirection: 'row', backgroundColor: colors.violet },
   labCompact: { flexDirection: 'column' },
-  labIntro: { flex: 0.78, justifyContent: 'center', padding: 44 },
+  labIntro: { flex: 0.78, justifyContent: 'center', position: 'relative', padding: 44 },
+  labMascot: { alignSelf: 'flex-end', marginTop: 30, marginBottom: -46, transform: [{ rotate: '-7deg' }] },
   labKicker: { color: colors.ink, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700', letterSpacing: 1 },
-  labTitle: { marginTop: 24, color: colors.ink, fontFamily: fonts.display, fontSize: 58, lineHeight: 57, fontWeight: '900', letterSpacing: -3 },
-  labTitleCompact: { fontSize: 41, lineHeight: 42, letterSpacing: -2 },
-  labCopy: { maxWidth: 450, marginTop: 28, color: '#17151f', fontFamily: fonts.sans, fontSize: 16, lineHeight: 24 },
+  labTitle: { marginTop: 24, color: colors.ink, fontFamily: fonts.display, fontSize: 64, lineHeight: 60, fontWeight: '900', letterSpacing: -0.7 },
+  labTitleCompact: { fontSize: 45, lineHeight: 43, letterSpacing: -0.4 },
+  labCopy: { maxWidth: 450, marginTop: 28, color: colors.ink, fontFamily: fonts.sans, fontSize: 16, lineHeight: 24 },
   labCanvas: { flex: 1.22, minHeight: 800, position: 'relative', overflow: 'hidden', backgroundColor: colors.ink, borderLeftWidth: 1, borderLeftColor: colors.ink },
   labCanvasCompact: { flex: 0, minHeight: 660, borderLeftWidth: 0, borderTopWidth: 1, borderTopColor: colors.ink },
   labTile: { position: 'absolute', overflow: 'hidden', borderWidth: 1, borderColor: colors.paper },
@@ -154,18 +161,20 @@ const styles = StyleSheet.create({
   aboutImage: { width: '100%', height: '100%' },
   aboutIndex: { position: 'absolute', right: 18, top: 18, paddingHorizontal: 12, paddingVertical: 9, backgroundColor: colors.cyan },
   aboutIndexText: { color: colors.ink, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700', letterSpacing: 0.9 },
-  aboutCopyWrap: { flex: 1.1, justifyContent: 'center', padding: 52 },
+  aboutCopyWrap: { flex: 1.1, justifyContent: 'center', position: 'relative', padding: 52 },
+  aboutMascot: { position: 'absolute', right: 24, top: 18, transform: [{ rotate: '8deg' }] },
   aboutKicker: { color: colors.violet, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700', letterSpacing: 1 },
-  aboutTitle: { marginTop: 22, color: colors.ink, fontFamily: fonts.display, fontSize: 60, lineHeight: 59, fontWeight: '900', letterSpacing: -3.2 },
-  aboutTitleCompact: { fontSize: 43, lineHeight: 43, letterSpacing: -2.3 },
-  aboutCopy: { maxWidth: 600, marginTop: 30, color: '#33333a', fontFamily: fonts.sans, fontSize: 18, lineHeight: 28 },
+  aboutTitle: { marginTop: 22, color: colors.ink, fontFamily: fonts.display, fontSize: 68, lineHeight: 64, fontWeight: '900', letterSpacing: -0.8 },
+  aboutTitleCompact: { fontSize: 47, lineHeight: 45, letterSpacing: -0.4 },
+  aboutCopy: { maxWidth: 600, marginTop: 30, color: colors.navy, fontFamily: fonts.sans, fontSize: 18, lineHeight: 28 },
   aboutQuote: { maxWidth: 580, marginTop: 34, paddingLeft: 18, color: colors.violet, fontFamily: fonts.serif, fontSize: 26, lineHeight: 33, fontStyle: 'italic', borderLeftWidth: 5, borderLeftColor: colors.acid },
   aboutFacts: { marginTop: 44, paddingTop: 20, borderTopWidth: 1, borderTopColor: colors.ink, gap: 9 },
   aboutFact: { color: colors.ink, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700', letterSpacing: 0.8 },
-  contact: { width: '100%', maxWidth: layout.max, alignSelf: 'center', padding: 44, backgroundColor: colors.acid },
+  contact: { width: '100%', maxWidth: layout.max, alignSelf: 'center', position: 'relative', overflow: 'hidden', padding: 44, backgroundColor: colors.acid },
+  contactMascot: { position: 'absolute', right: '6%', top: 20, transform: [{ rotate: '-8deg' }] },
   contactKicker: { color: colors.ink, fontFamily: fonts.mono, fontSize: 9, fontWeight: '700', letterSpacing: 1 },
-  contactTitle: { marginTop: 45, color: colors.ink, fontFamily: fonts.display, fontSize: 115, lineHeight: 101, fontWeight: '900', letterSpacing: -7 },
-  contactTitleCompact: { fontSize: 57, lineHeight: 53, letterSpacing: -3.5 },
+  contactTitle: { maxWidth: 900, marginTop: 45, color: colors.ink, fontFamily: fonts.display, fontSize: 122, lineHeight: 106, fontWeight: '900', letterSpacing: -1.5 },
+  contactTitleCompact: { maxWidth: '72%', fontSize: 61, lineHeight: 56, letterSpacing: -0.6 },
   contactBottom: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', gap: 40, marginTop: 64 },
   contactBottomCompact: { flexDirection: 'column', alignItems: 'stretch' },
   contactNote: { flex: 1, maxWidth: 520, color: colors.ink, fontFamily: fonts.sans, fontSize: 17, lineHeight: 25 },

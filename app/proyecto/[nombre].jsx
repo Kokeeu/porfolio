@@ -1,10 +1,11 @@
 import { Linking, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import Head from 'expo-router/head';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { obtenerCasoProyecto, obtenerSiguienteProyecto, PROYECTOS_DESTACADOS } from '../../data/proyectos';
 import CaseVisual, { getProjectScheme } from '../../src/components/portfolio/CaseVisual';
+import { useGameTransition } from '../../src/components/portfolio/GameTransition';
 import { colors, fonts, layout } from '../../src/design/tokens';
 
 const GITHUB_USER = 'Kokeeu';
@@ -36,7 +37,7 @@ const Metric = ({ value, label, accent }) => (
 
 export default function ProjectPage() {
   const { nombre } = useLocalSearchParams();
-  const router = useRouter();
+  const { navigate } = useGameTransition();
   const { width } = useWindowDimensions();
   const compact = width < 900;
   const routeName = Array.isArray(nombre) ? nombre[0] : nombre;
@@ -47,7 +48,7 @@ export default function ProjectPage() {
       <View style={styles.notFound}>
         <Text style={styles.notFoundCode}>404</Text>
         <Text style={styles.notFoundText}>ESTE CASO NO EXISTE EN EL ARCHIVO.</Text>
-        <ProjectLink label="VOLVER AL MENÚ" onPress={() => router.replace('/')} />
+        <ProjectLink label="VOLVER AL MENÚ" onPress={() => navigate('/', { replace: true, label: '00' })} />
       </View>
     );
   }
@@ -61,14 +62,14 @@ export default function ProjectPage() {
       <Head>
         <title>{caso.titulo} — Anderson Solano</title>
         <meta name="description" content={caso.resumen} />
-        <meta name="theme-color" content="#050507" />
+        <meta name="theme-color" content="#070d1b" />
         <meta property="og:title" content={`${caso.titulo} — Anderson Solano`} />
         <meta property="og:description" content={caso.resumen} />
       </Head>
       <StatusBar style="light" />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.topbar}>
-          <NavAction label="VOLVER A MISIONES" icon="arrow-back" onPress={() => router.replace('/misiones')} />
+          <NavAction label="VOLVER A MISIONES" icon="arrow-back" onPress={() => navigate('/misiones', { replace: true, label: '01' })} />
           <View style={styles.brand}>
             <Text style={styles.brandMark}>AS</Text>
             <Text style={styles.brandText}>MISSION BRIEF / {caso.indice}</Text>
@@ -150,7 +151,7 @@ export default function ProjectPage() {
           </View>
         </View>
 
-        <Pressable accessibilityRole="link" accessibilityLabel={`Siguiente caso: ${next.titulo}`} onPress={() => router.push({ pathname: '/proyecto/[nombre]', params: { nombre: next.repo } })} style={({ pressed }) => [styles.next, { backgroundColor: scheme.accent }, pressed && styles.nextPressed]}>
+        <Pressable accessibilityRole="link" accessibilityLabel={`Siguiente caso: ${next.titulo}`} onPress={() => navigate({ pathname: '/proyecto/[nombre]', params: { nombre: next.repo } }, { label: next.indice })} style={({ pressed }) => [styles.next, { backgroundColor: scheme.accent }, pressed && styles.nextPressed]}>
           <View>
             <Text style={[styles.nextKicker, { color: scheme.ink }]}>SIGUIENTE MISIÓN / {next.indice}</Text>
             <Text style={[styles.nextTitle, compact && styles.nextTitleCompact, { color: scheme.ink }]}>{next.titulo.toUpperCase()}</Text>
@@ -165,7 +166,7 @@ export default function ProjectPage() {
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: colors.ink },
   scroll: { width: '100%', alignItems: 'stretch', backgroundColor: colors.ink },
-  topbar: { width: '100%', maxWidth: layout.max, minHeight: 74, alignSelf: 'center', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#3c3c44' },
+  topbar: { width: '100%', maxWidth: layout.max, minHeight: 74, alignSelf: 'center', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: colors.navy },
   navAction: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10 },
   navActionActive: { opacity: 0.62 },
   navActionText: { color: colors.paper, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700', letterSpacing: 0.8 },

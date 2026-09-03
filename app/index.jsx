@@ -1,8 +1,8 @@
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
-import { useRouter } from 'expo-router';
 import Head from 'expo-router/head';
 import { StatusBar } from 'expo-status-bar';
 import PortfolioHero from '../src/components/portfolio/PortfolioHero';
+import { useGameTransition } from '../src/components/portfolio/GameTransition';
 import { colors } from '../src/design/tokens';
 
 const routes = {
@@ -13,13 +13,13 @@ const routes = {
 };
 
 export default function HomePage() {
-  const router = useRouter();
+  const { navigate: transitionTo } = useGameTransition();
   const { width } = useWindowDimensions();
   const compact = width < 920;
 
-  const navigate = (destination) => {
+  const navigate = (destination, label) => {
     const route = routes[destination];
-    if (route) router.push(route);
+    if (route) transitionTo(route, { label });
   };
 
   return (
@@ -27,7 +27,7 @@ export default function HomePage() {
       <Head>
         <title>Anderson Solano — Creative Frontend Developer</title>
         <meta name="description" content="Portafolio interactivo de Anderson Solano: frontend, producto y dirección visual para web y móvil." />
-        <meta name="theme-color" content="#050507" />
+        <meta name="theme-color" content="#070d1b" />
         <meta property="og:title" content="Anderson Solano — Creative Frontend Developer" />
         <meta property="og:description" content="Interfaces con frecuencia: selecciona una ruta para explorar el archivo." />
       </Head>

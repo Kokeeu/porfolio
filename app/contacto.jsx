@@ -4,7 +4,7 @@ import { Contact } from '../src/components/portfolio/PortfolioSections';
 
 const EMAIL = 'andersonsolanochavarria@gmail.com';
 const LINKEDIN = 'https://www.linkedin.com/in/anderson-solano-chavarria-75a5763b8';
-const PINK = '#ff6dcb';
+const PINK = '#70f1f2';
 
 export default function ContactPage() {
   const { width } = useWindowDimensions();
