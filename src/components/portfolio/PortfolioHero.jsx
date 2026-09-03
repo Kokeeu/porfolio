@@ -1,17 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { AccessibilityInfo, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, fonts, layout } from '../../design/tokens';
+import MascotSticker from './MascotSticker';
 
 const menuItems = [
-  { key: 'work', index: '01', label: 'MISIONES', eyebrow: 'CASOS SELECCIONADOS', description: 'Cuatro productos, cuatro problemas reales y las decisiones que les dieron forma.', icon: 'map-outline', accent: colors.pink, ink: colors.paper, rotation: '-2deg' },
-  { key: 'loadout', index: '02', label: 'LOADOUT + LAB', eyebrow: 'MÉTODO Y EXPERIMENTOS', description: 'Mi sistema de trabajo, herramientas y exploraciones visuales en una sola ruta.', icon: 'construct-outline', accent: colors.blue, ink: colors.paper, rotation: '1.4deg' },
-  { key: 'profile', index: '03', label: 'PERFIL', eyebrow: 'PLAYER FILE', description: 'Quién soy, desde dónde trabajo y qué clase de experiencias quiero construir.', icon: 'person-outline', accent: colors.paper, ink: colors.ink, rotation: '-1deg' },
-  { key: 'contact', index: '04', label: 'CONTACTO', eyebrow: 'OPEN CHANNEL', description: 'Un canal directo para proyectos que necesitan criterio, carácter y código.', icon: 'paper-plane-outline', accent: colors.cyan, ink: colors.ink, rotation: '2.2deg' },
+  { key: 'work', index: '01', label: 'MISIONES', eyebrow: 'CASOS SELECCIONADOS', description: 'Cuatro productos, cuatro problemas reales y las decisiones que les dieron forma.', icon: 'map-outline', accent: colors.pink, ink: colors.paper },
+  { key: 'loadout', index: '02', label: 'LOADOUT + LAB', eyebrow: 'MÉTODO Y EXPERIMENTOS', description: 'Mi sistema de trabajo, herramientas y exploraciones visuales en una sola ruta.', icon: 'construct-outline', accent: colors.blue, ink: colors.paper },
+  { key: 'profile', index: '03', label: 'PERFIL', eyebrow: 'PLAYER FILE', description: 'Quién soy, desde dónde trabajo y qué clase de experiencias quiero construir.', icon: 'person-outline', accent: colors.paper, ink: colors.ink },
+  { key: 'contact', index: '04', label: 'CONTACTO', eyebrow: 'OPEN CHANNEL', description: 'Un canal directo para proyectos que necesitan criterio, carácter y código.', icon: 'paper-plane-outline', accent: colors.cyan, ink: colors.ink },
 ];
-
-const sparks = ['✦', '×', '●', '✦', '+'];
-const mascotSheet = require('../../../assets/mascots/portfolio-mascot-sheet.png');
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -25,16 +23,16 @@ function useReducedMotion() {
   return reduced;
 }
 
-function RouteMenu({ activeIndex, mobile, onLaunch, onSelect, reduced }) {
+function RouteMenu({ activeIndex, compact, mobile, onLaunch, onSelect, reduced }) {
   const focusRefs = useRef([]);
   const energies = useRef(menuItems.map((_, index) => new Animated.Value(index === 0 ? 1 : 0))).current;
 
   useEffect(() => {
     Animated.parallel(energies.map((energy, index) => Animated.spring(energy, {
       toValue: index === activeIndex ? 1 : 0,
-      damping: 18,
-      stiffness: 220,
-      mass: 0.7,
+      damping: 16,
+      stiffness: 230,
+      mass: 0.68,
       useNativeDriver: true,
     }))).start();
   }, [activeIndex, energies]);
@@ -50,15 +48,23 @@ function RouteMenu({ activeIndex, mobile, onLaunch, onSelect, reduced }) {
   };
 
   return (
-    <View accessibilityRole="menu" style={[styles.routeMenu, mobile && styles.routeMenuMobile]}>
+    <View accessibilityRole="menu" style={[styles.routeMenu, compact && styles.routeMenuCompact]}>
       {menuItems.map((item, index) => {
         const selected = index === activeIndex;
-        const translateX = energies[index].interpolate({ inputRange: [0, 1], outputRange: [0, mobile ? 7 : 22] });
-        const scale = energies[index].interpolate({ inputRange: [0, 1], outputRange: [0.97, 1.04] });
+        const onRight = index > 1;
+        const scale = energies[index].interpolate({ inputRange: [0, 1], outputRange: [0.94, 1.1] });
+        const translateX = energies[index].interpolate({ inputRange: [0, 1], outputRange: [0, onRight ? -16 : 16] });
         const foreground = selected ? item.ink : colors.paper;
 
         return (
-          <View key={item.key} style={[styles.optionAngle, { transform: [{ rotate: item.rotation }] }]}>
+          <View
+            key={item.key}
+            style={[
+              styles.optionSlot,
+              compact && styles.optionSlotCompact,
+              !compact && styles[`optionPosition${index}`],
+            ]}
+          >
             <Animated.View style={{ transform: reduced ? [] : [{ translateX }, { scale }] }}>
               <Pressable
                 ref={(node) => { focusRefs.current[index] = node; }}
@@ -69,16 +75,22 @@ function RouteMenu({ activeIndex, mobile, onLaunch, onSelect, reduced }) {
                 onHoverIn={() => onSelect(index)}
                 onKeyDown={(event) => moveSelection(event, index)}
                 onPress={() => onLaunch(item.key, item.index)}
-                style={({ pressed }) => [styles.option, mobile && styles.optionMobile, { backgroundColor: selected ? item.accent : colors.panel }, pressed && styles.optionPressed]}
+                style={({ pressed }) => [
+                  styles.option,
+                  mobile && styles.optionMobile,
+                  onRight && !compact && styles.optionRight,
+                  { backgroundColor: selected ? item.accent : colors.ink, borderColor: selected ? colors.ink : item.accent },
+                  pressed && styles.optionPressed,
+                ]}
               >
-                <View style={[styles.iconBox, { borderColor: foreground }]}>
-                  <Ionicons name={item.icon} size={mobile ? 18 : 22} color={foreground} />
+                <View style={[styles.iconDisk, { backgroundColor: selected ? item.ink : item.accent }]}>
+                  <Ionicons name={item.icon} size={mobile ? 18 : 22} color={selected ? item.accent : colors.ink} />
                 </View>
                 <View style={styles.optionCopy}>
-                  <Text style={[styles.optionEyebrow, { color: selected ? foreground : colors.cyan }]}>{item.index} / {item.eyebrow}</Text>
-                  <Text numberOfLines={1} style={[styles.optionLabel, mobile && styles.optionLabelMobile, { color: foreground }]}>{item.label}</Text>
+                  <Text style={[styles.optionEyebrow, onRight && !compact && styles.optionCopyRight, { color: selected ? foreground : item.accent }]}>{item.index} / {item.eyebrow}</Text>
+                  <Text numberOfLines={1} style={[styles.optionLabel, mobile && styles.optionLabelMobile, onRight && !compact && styles.optionCopyRight, { color: foreground }]}>{item.label}</Text>
                 </View>
-                <Text style={[styles.optionArrow, { color: foreground }]}>{selected ? '↗' : '—'}</Text>
+                <Text style={[styles.optionArrow, { color: foreground }]}>{selected ? '◆' : '◇'}</Text>
               </Pressable>
             </Animated.View>
           </View>
@@ -88,20 +100,41 @@ function RouteMenu({ activeIndex, mobile, onLaunch, onSelect, reduced }) {
   );
 }
 
+function MascotCore({ activeIndex, compact, mobile, selection, progress }) {
+  const size = mobile ? 210 : compact ? 260 : 330;
+
+  return (
+    <View style={[styles.mascotCore, compact && styles.mascotCoreCompact, { width: size, height: size }]}>
+      <View style={[styles.coreOrbit, { borderColor: selection.accent }]} />
+      <View style={[styles.coreCross, styles.coreCrossHorizontal, { backgroundColor: selection.accent }]} />
+      <View style={[styles.coreCross, styles.coreCrossVertical, { backgroundColor: selection.accent }]} />
+      <Animated.View style={{ opacity: progress, transform: [{ scale: progress }, { rotate: activeIndex % 2 ? '3deg' : '-3deg' }] }}>
+        <MascotSticker index={activeIndex} size={size * 0.84} label={`Mascota original de ${selection.label}`} />
+      </Animated.View>
+      <View style={[styles.playerTag, { backgroundColor: selection.accent }]}>
+        <Text style={[styles.playerTagText, { color: selection.ink }]}>PLAYER {selection.index}</Text>
+      </View>
+    </View>
+  );
+}
+
 export default function PortfolioHero({ compact, mobile, onNavigate }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const reduced = useReducedMotion();
+  const mascotProgress = useRef(new Animated.Value(1)).current;
   const selection = menuItems[activeIndex];
-  const preview = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    if (reduced) return;
-    preview.setValue(0);
-    Animated.timing(preview, { toValue: 1, duration: 260, useNativeDriver: true }).start();
-  }, [activeIndex, preview, reduced]);
+    if (reduced) {
+      mascotProgress.setValue(1);
+      return;
+    }
+    mascotProgress.setValue(0.72);
+    Animated.spring(mascotProgress, { toValue: 1, damping: 13, stiffness: 210, mass: 0.65, useNativeDriver: true }).start();
+  }, [activeIndex, mascotProgress, reduced]);
 
   return (
-    <View style={[styles.shell, compact && styles.shellCompact]}>
+    <View style={styles.shell}>
       <View style={[styles.topbar, mobile && styles.topbarMobile]}>
         <View style={styles.identity}>
           <View style={[styles.mark, { backgroundColor: selection.accent }]}><Text style={[styles.markText, { color: selection.ink }]}>AS</Text></View>
@@ -117,57 +150,29 @@ export default function PortfolioHero({ compact, mobile, onNavigate }) {
       </View>
 
       <View style={[styles.stage, compact && styles.stageCompact]}>
-        <View style={[styles.menuSide, compact && styles.menuSideCompact]}>
-          <View style={styles.chapterRow}>
-            <Text style={styles.chapter}>MAIN MENU</Text>
-            <Text style={[styles.chapterCode, { color: selection.accent }]}>CHAPTER 00 / READY</Text>
-          </View>
-
-          <View style={styles.titleWrap}>
-            <Text style={[styles.titleGhost, mobile && styles.titleGhostMobile]}>SELECT</Text>
-            <Text style={[styles.title, mobile && styles.titleMobile]}>ELIGE UNA</Text>
-            <View style={[styles.titleSlab, { backgroundColor: selection.accent, transform: [{ rotate: '-1.8deg' }] }]}>
-              <Text style={[styles.titleSlabText, mobile && styles.titleSlabTextMobile, { color: selection.ink }]}>RUTA.</Text>
-            </View>
-          </View>
-
-          <RouteMenu activeIndex={activeIndex} mobile={mobile} onLaunch={onNavigate} onSelect={setActiveIndex} reduced={reduced} />
-
-          <View style={styles.controls}>
-            <Text style={styles.controlsText}>↑↓ CAMBIAR</Text>
-            <Text style={[styles.controlsText, { color: selection.accent }]}>ENTER / ABRIR</Text>
-          </View>
+        <View style={[styles.heading, compact && styles.headingCompact]}>
+          <Text style={styles.headingKicker}>MAIN MENU / CHAPTER 00</Text>
+          <Text style={[styles.headingTitle, mobile && styles.headingTitleMobile]}>ELIGE{`\n`}UNA RUTA.</Text>
+          <View style={[styles.headingSignal, { backgroundColor: selection.accent }]} />
         </View>
 
-        <View style={[styles.previewSide, compact && styles.previewSideCompact]}>
-          <View style={[styles.bigNumberWrap, { borderColor: selection.accent }]}>
-            <Animated.Text style={[styles.bigNumber, mobile && styles.bigNumberMobile, { color: selection.accent, opacity: preview }]}>{selection.index}</Animated.Text>
+        {!compact ? (
+          <View pointerEvents="none" style={styles.connectionField}>
+            <View style={[styles.connection, styles.connectionA, { backgroundColor: selection.accent }]} />
+            <View style={[styles.connection, styles.connectionB, { backgroundColor: selection.accent }]} />
+            <View style={[styles.connection, styles.connectionC, { backgroundColor: selection.accent }]} />
+            <View style={[styles.connection, styles.connectionD, { backgroundColor: selection.accent }]} />
           </View>
+        ) : null}
 
-          <Animated.View style={[styles.mascotWindow, mobile && styles.mascotWindowMobile, { opacity: preview, borderColor: selection.accent, transform: [{ rotate: selection.rotation }] }]}>
-            <View style={[styles.mascotBackdrop, { backgroundColor: selection.accent }]} />
-            <Image
-              source={mascotSheet}
-              resizeMode="stretch"
-              accessibilityLabel={`Mascota original de la ruta ${selection.label}`}
-              style={[styles.mascotSheet, { left: `${-activeIndex * 100}%` }]}
-            />
-            <View style={[styles.mascotTag, { backgroundColor: selection.ink }]}>
-              <Text style={[styles.mascotTagText, { color: selection.accent }]}>PLAYER {selection.index}</Text>
-            </View>
-          </Animated.View>
+        <MascotCore activeIndex={activeIndex} compact={compact} mobile={mobile} selection={selection} progress={mascotProgress} />
 
-          <View style={[styles.briefCard, mobile && styles.briefCardMobile, { borderColor: selection.accent }]}>
-            <Text style={[styles.briefKicker, { color: selection.accent }]}>CURRENT SELECTION / {selection.index}</Text>
-            <Text style={[styles.briefTitle, mobile && styles.briefTitleMobile]}>{selection.label}</Text>
-            <Text style={styles.briefCopy}>{selection.description}</Text>
-            <View style={styles.briefRule} />
-            <Text style={styles.briefHint}>TOCA LA OPCIÓN PARA ENTRAR</Text>
-          </View>
+        <RouteMenu activeIndex={activeIndex} compact={compact} mobile={mobile} onLaunch={onNavigate} onSelect={setActiveIndex} reduced={reduced} />
 
-          <View style={styles.sparkField} pointerEvents="none">
-            {sparks.map((spark, index) => <Text key={`${spark}-${index}`} style={[styles.spark, styles[`spark${index}`], { color: index % 2 ? colors.cyan : selection.accent }]}>{spark}</Text>)}
-          </View>
+        <View style={[styles.brief, compact && styles.briefCompact, { borderColor: selection.accent }]}>
+          <Text style={[styles.briefIndex, { color: selection.accent }]}>CURRENT / {selection.index}</Text>
+          <Text style={[styles.briefText, mobile && styles.briefTextMobile]}>{selection.description}</Text>
+          <Text style={styles.briefHint}>↑↓ SELECT · ENTER OPEN</Text>
         </View>
       </View>
 
@@ -182,8 +187,7 @@ export default function PortfolioHero({ compact, mobile, onNavigate }) {
 
 const styles = StyleSheet.create({
   shell: { width: '100%', maxWidth: layout.max, minHeight: 900, alignSelf: 'center', overflow: 'hidden', backgroundColor: colors.ink },
-  shellCompact: { minHeight: 0 },
-  topbar: { minHeight: 78, zIndex: 5, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: layout.gutter, borderBottomWidth: 1, borderBottomColor: colors.navy },
+  topbar: { minHeight: 76, zIndex: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: layout.gutter, borderBottomWidth: 1, borderBottomColor: colors.navy },
   topbarMobile: { minHeight: 66, paddingHorizontal: layout.mobileGutter },
   identity: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   mark: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '-5deg' }] },
@@ -193,61 +197,53 @@ const styles = StyleSheet.create({
   online: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   onlineDot: { width: 8, height: 8, borderRadius: 4 },
   onlineText: { color: colors.paper, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 1 },
-  stage: { minHeight: 770, flexDirection: 'row', position: 'relative' },
-  stageCompact: { flexDirection: 'column' },
-  menuSide: { flex: 1.05, zIndex: 2, justifyContent: 'center', paddingHorizontal: 48, paddingVertical: 42 },
-  menuSideCompact: { paddingHorizontal: layout.mobileGutter, paddingTop: 44, paddingBottom: 28 },
-  chapterRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16 },
-  chapter: { color: colors.paper, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700', letterSpacing: 2 },
-  chapterCode: { fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 1 },
-  titleWrap: { marginTop: 28, marginBottom: 26, alignSelf: 'flex-start' },
-  titleGhost: { position: 'absolute', left: 245, top: -32, color: colors.navy, fontFamily: fonts.display, fontSize: 84, lineHeight: 84, fontWeight: '900', transform: [{ rotate: '5deg' }] },
-  titleGhostMobile: { left: 145, top: -18, fontSize: 52, lineHeight: 52 },
-  title: { color: colors.paper, fontFamily: fonts.display, fontSize: 78, lineHeight: 72, fontWeight: '900', letterSpacing: -1.5 },
-  titleMobile: { fontSize: 52, lineHeight: 49 },
-  titleSlab: { alignSelf: 'flex-start', marginTop: -2, paddingHorizontal: 18, paddingVertical: 1 },
-  titleSlabText: { fontFamily: fonts.display, fontSize: 91, lineHeight: 88, fontWeight: '900', letterSpacing: -2 },
-  titleSlabTextMobile: { fontSize: 64, lineHeight: 61 },
-  routeMenu: { width: '100%', maxWidth: 650, gap: 2 },
-  routeMenuMobile: { gap: 0 },
-  optionAngle: { marginVertical: -1 },
-  option: { minHeight: 76, flexDirection: 'row', alignItems: 'center', gap: 15, paddingHorizontal: 16, borderWidth: 2, borderColor: colors.ink },
-  optionMobile: { minHeight: 66, gap: 11, paddingHorizontal: 12 },
-  optionPressed: { opacity: 0.75 },
-  iconBox: { width: 42, height: 42, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
+  stage: { minHeight: 772, position: 'relative', overflow: 'hidden', backgroundColor: colors.ink },
+  stageCompact: { minHeight: 0, alignItems: 'stretch', paddingHorizontal: layout.mobileGutter, paddingVertical: 42 },
+  heading: { position: 'absolute', zIndex: 1, left: 48, top: 46 },
+  headingCompact: { position: 'relative', left: 0, top: 0, alignSelf: 'flex-start', marginBottom: 18 },
+  headingKicker: { color: colors.cyan, fontFamily: fonts.mono, fontSize: 8, fontWeight: '700', letterSpacing: 1.5 },
+  headingTitle: { marginTop: 10, color: colors.paper, fontFamily: fonts.display, fontSize: 66, lineHeight: 57, fontWeight: '900', letterSpacing: -0.8 },
+  headingTitleMobile: { fontSize: 50, lineHeight: 44 },
+  headingSignal: { width: 78, height: 7, marginTop: 14, transform: [{ skewX: '-25deg' }] },
+  routeMenu: { ...StyleSheet.absoluteFillObject, zIndex: 4 },
+  routeMenuCompact: { position: 'relative', top: 0, right: 0, bottom: 0, left: 0, width: '100%', gap: 5, marginTop: 24 },
+  optionSlot: { position: 'absolute', width: '31%', zIndex: 3 },
+  optionSlotCompact: { position: 'relative', width: '100%' },
+  optionPosition0: { left: '4%', top: 240, transform: [{ rotate: '-5deg' }] },
+  optionPosition1: { left: '8%', top: 390, transform: [{ rotate: '3deg' }] },
+  optionPosition2: { right: '4%', top: 215, transform: [{ rotate: '4deg' }] },
+  optionPosition3: { right: '8%', top: 370, transform: [{ rotate: '-4deg' }] },
+  option: { minHeight: 86, flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 16, borderWidth: 2 },
+  optionRight: { flexDirection: 'row-reverse' },
+  optionMobile: { minHeight: 70, gap: 11, paddingHorizontal: 12 },
+  optionPressed: { opacity: 0.66 },
+  iconDisk: { width: 48, height: 48, borderRadius: 25, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: colors.ink },
   optionCopy: { flex: 1, minWidth: 0 },
-  optionEyebrow: { fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 0.9 },
-  optionLabel: { marginTop: 1, fontFamily: fonts.display, fontSize: 36, lineHeight: 37, fontWeight: '900', letterSpacing: 0.2 },
-  optionLabelMobile: { fontSize: 28, lineHeight: 29 },
-  optionArrow: { fontFamily: fonts.display, fontSize: 29, fontWeight: '900' },
-  controls: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 18, paddingHorizontal: 4 },
-  controlsText: { color: colors.fog, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 1 },
-  previewSide: { flex: 0.95, minHeight: 770, position: 'relative', overflow: 'hidden', justifyContent: 'flex-end', padding: 36, backgroundColor: colors.navy },
-  previewSideCompact: { minHeight: 620, padding: layout.mobileGutter },
-  bigNumberWrap: { position: 'absolute', top: 36, right: 36, width: 160, height: 142, alignItems: 'center', justifyContent: 'center', borderWidth: 2, transform: [{ rotate: '5deg' }] },
-  bigNumber: { fontFamily: fonts.display, fontSize: 132, lineHeight: 133, fontWeight: '900' },
-  bigNumberMobile: { fontSize: 104, lineHeight: 105 },
-  mascotWindow: { position: 'absolute', left: '8%', top: '8%', width: '55%', aspectRatio: 1, overflow: 'hidden', borderWidth: 3, backgroundColor: colors.paper },
-  mascotWindowMobile: { width: '58%', top: '10%' },
-  mascotBackdrop: { ...StyleSheet.absoluteFillObject, opacity: 0.12 },
-  mascotSheet: { position: 'absolute', top: 0, width: '400%', height: '100%' },
-  mascotTag: { position: 'absolute', left: 10, bottom: 10, paddingHorizontal: 8, paddingVertical: 5 },
-  mascotTagText: { fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 1 },
-  briefCard: { zIndex: 2, padding: 24, backgroundColor: colors.ink, borderWidth: 2, transform: [{ rotate: '-1deg' }] },
-  briefCardMobile: { padding: 19 },
-  briefKicker: { fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 1.1 },
-  briefTitle: { marginTop: 8, color: colors.paper, fontFamily: fonts.display, fontSize: 48, lineHeight: 48, fontWeight: '900' },
-  briefTitleMobile: { fontSize: 37, lineHeight: 38 },
-  briefCopy: { maxWidth: 500, marginTop: 9, color: colors.fog, fontFamily: fonts.sans, fontSize: 14, lineHeight: 21 },
-  briefRule: { height: 1, marginTop: 18, backgroundColor: colors.navy },
-  briefHint: { marginTop: 10, color: colors.cyan, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 1 },
-  sparkField: { ...StyleSheet.absoluteFillObject },
-  spark: { position: 'absolute', fontFamily: fonts.sans, fontSize: 30, fontWeight: '900' },
-  spark0: { left: '8%', bottom: '35%' },
-  spark1: { right: '9%', top: '29%', fontSize: 44 },
-  spark2: { left: '48%', top: '6%', fontSize: 11 },
-  spark3: { right: '5%', bottom: '29%', fontSize: 22 },
-  spark4: { left: '4%', top: '51%', fontSize: 40 },
+  optionCopyRight: { textAlign: 'right' },
+  optionEyebrow: { fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 0.7 },
+  optionLabel: { marginTop: 1, color: colors.paper, fontFamily: fonts.display, fontSize: 36, lineHeight: 37, fontWeight: '900', letterSpacing: 0.1 },
+  optionLabelMobile: { fontSize: 30, lineHeight: 31 },
+  optionArrow: { fontFamily: fonts.sans, fontSize: 16, fontWeight: '900' },
+  mascotCore: { position: 'absolute', zIndex: 3, left: '50%', top: 205, alignItems: 'center', justifyContent: 'center', marginLeft: -165 },
+  mascotCoreCompact: { position: 'relative', left: 0, top: 0, alignSelf: 'center', marginLeft: 0, marginTop: -4 },
+  coreOrbit: { position: 'absolute', width: '92%', height: '92%', borderRadius: 999, borderWidth: 2, borderStyle: 'dashed', transform: [{ rotate: '9deg' }] },
+  coreCross: { position: 'absolute', opacity: 0.5 },
+  coreCrossHorizontal: { width: '118%', height: 1 },
+  coreCrossVertical: { width: 1, height: '118%' },
+  playerTag: { position: 'absolute', right: -4, bottom: 16, paddingHorizontal: 10, paddingVertical: 6, transform: [{ rotate: '-6deg' }] },
+  playerTagText: { fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 1 },
+  connectionField: { ...StyleSheet.absoluteFillObject, zIndex: 2 },
+  connection: { position: 'absolute', width: '23%', height: 2, opacity: 0.52 },
+  connectionA: { left: '29%', top: 295, transform: [{ rotate: '10deg' }] },
+  connectionB: { left: '31%', top: 444, transform: [{ rotate: '-13deg' }] },
+  connectionC: { right: '29%', top: 286, transform: [{ rotate: '-12deg' }] },
+  connectionD: { right: '31%', top: 430, transform: [{ rotate: '12deg' }] },
+  brief: { position: 'absolute', left: '28%', right: '28%', bottom: 34, zIndex: 5, padding: 16, backgroundColor: colors.navy, borderWidth: 2, transform: [{ rotate: '-1deg' }] },
+  briefCompact: { position: 'relative', left: 0, right: 0, bottom: 0, width: '100%', marginTop: 24 },
+  briefIndex: { fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 1 },
+  briefText: { marginTop: 7, color: colors.paper, fontFamily: fonts.sans, fontSize: 14, lineHeight: 20, textAlign: 'center' },
+  briefTextMobile: { textAlign: 'left' },
+  briefHint: { marginTop: 10, color: colors.fog, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 0.9, textAlign: 'center' },
   footerRail: { minHeight: 52, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingHorizontal: layout.gutter, borderTopWidth: 1, borderTopColor: colors.navy },
   railText: { color: colors.fog, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 1 },
 });
