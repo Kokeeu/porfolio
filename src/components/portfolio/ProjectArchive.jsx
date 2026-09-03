@@ -19,7 +19,8 @@ function ProjectSlide({ caso, variant, compact, onPress }) {
 
   if (variant === 'lead') {
     return (
-      <Pressable accessibilityRole="link" accessibilityLabel={`Abrir caso de estudio: ${caso.titulo}`} onPress={onPress} style={({ pressed, hovered }) => [styles.slide, styles.leadSlide, (pressed || hovered) && styles.slideActive]}>
+      <Pressable accessibilityRole="link" accessibilityLabel={`Abrir caso de estudio: ${caso.titulo}`} onPress={onPress} style={({ focused, hovered, pressed }) => [styles.slide, styles.leadSlide, (pressed || hovered || focused) && styles.slideActive]}>
+        <View style={styles.dossierTab}><Text style={styles.dossierTabText}>{caso.indice}</Text></View>
         <Image source={getProjectImage(caso.repo)} style={styles.fullImage} resizeMode={caso.repo === 'Siwo' ? 'contain' : 'cover'} accessibilityLabel={`Visual de ${caso.titulo}`} />
         <View style={styles.leadShade} />
         <View style={styles.leadFrame} />
@@ -38,7 +39,8 @@ function ProjectSlide({ caso, variant, compact, onPress }) {
 
   if (variant === 'data') {
     return (
-      <Pressable accessibilityRole="link" accessibilityLabel={`Abrir caso de estudio: ${caso.titulo}`} onPress={onPress} style={({ pressed, hovered }) => [styles.slide, styles.dataSlide, { backgroundColor: scheme.accent }, (pressed || hovered) && styles.slideActive]}>
+      <Pressable accessibilityRole="link" accessibilityLabel={`Abrir caso de estudio: ${caso.titulo}`} onPress={onPress} style={({ focused, hovered, pressed }) => [styles.slide, styles.dataSlide, { backgroundColor: scheme.accent }, (pressed || hovered || focused) && styles.slideActive]}>
+        <View style={[styles.dossierTab, styles.dossierTabDark]}><Text style={[styles.dossierTabText, styles.dossierTabTextDark]}>{caso.indice}</Text></View>
         <SlideMeta caso={caso} dark />
         <View style={styles.dataVisual}>
           <Image source={getProjectImage(caso.repo)} style={styles.fullImage} resizeMode="cover" accessibilityLabel={`Visual de ${caso.titulo}`} />
@@ -56,7 +58,8 @@ function ProjectSlide({ caso, variant, compact, onPress }) {
 
   if (variant === 'quote') {
     return (
-      <Pressable accessibilityRole="link" accessibilityLabel={`Abrir caso de estudio: ${caso.titulo}`} onPress={onPress} style={({ pressed, hovered }) => [styles.slide, styles.quoteSlide, { backgroundColor: scheme.accent }, (pressed || hovered) && styles.slideActive]}>
+      <Pressable accessibilityRole="link" accessibilityLabel={`Abrir caso de estudio: ${caso.titulo}`} onPress={onPress} style={({ focused, hovered, pressed }) => [styles.slide, styles.quoteSlide, { backgroundColor: scheme.accent }, (pressed || hovered || focused) && styles.slideActive]}>
+        <View style={[styles.dossierTab, styles.dossierTabDark]}><Text style={[styles.dossierTabText, styles.dossierTabTextDark]}>{caso.indice}</Text></View>
         <SlideMeta caso={caso} dark={darkCopy} />
         <Text style={[styles.quoteMark, { color: scheme.ink }]}>“</Text>
         <Text style={[styles.quoteText, compact && styles.quoteTextCompact, { color: scheme.ink }]}>{caso.frase}</Text>
@@ -72,7 +75,8 @@ function ProjectSlide({ caso, variant, compact, onPress }) {
   }
 
   return (
-    <Pressable accessibilityRole="link" accessibilityLabel={`Abrir caso de estudio: ${caso.titulo}`} onPress={onPress} style={({ pressed, hovered }) => [styles.slide, styles.systemSlide, (pressed || hovered) && styles.slideActive]}>
+    <Pressable accessibilityRole="link" accessibilityLabel={`Abrir caso de estudio: ${caso.titulo}`} onPress={onPress} style={({ focused, hovered, pressed }) => [styles.slide, styles.systemSlide, (pressed || hovered || focused) && styles.slideActive]}>
+      <View style={styles.dossierTab}><Text style={styles.dossierTabText}>{caso.indice}</Text></View>
       <SlideMeta caso={caso} />
       <View style={styles.systemGrid}>
         <View style={styles.systemCopy}>
@@ -114,14 +118,24 @@ export default function ProjectArchive({ compact }) {
         </View>
       </View>
 
+      <View style={[styles.operationRail, compact && styles.operationRailCompact]}>
+        <View style={styles.operationLine} />
+        {projects.map((project, index) => (
+          <View key={project.repo} style={styles.operationPoint}>
+            <View style={[styles.operationNode, index === 0 && styles.operationNodeActive]}><Text style={[styles.operationNodeText, index === 0 && styles.operationNodeTextActive]}>{project.indice}</Text></View>
+            {!compact ? <Text numberOfLines={1} style={styles.operationLabel}>{project.titulo.toUpperCase()}</Text> : null}
+          </View>
+        ))}
+      </View>
+
       <View style={[styles.deck, compact && styles.deckCompact]}>
         <View style={[styles.deckRow, compact && styles.deckRowCompact]}>
-          <View style={styles.deckLead}><ProjectSlide caso={projects[0]} variant="lead" compact={compact} onPress={() => openProject(projects[0].repo, projects[0].indice)} /></View>
-          <View style={styles.deckSide}><ProjectSlide caso={projects[1]} variant="data" compact={compact} onPress={() => openProject(projects[1].repo, projects[1].indice)} /></View>
+          <View style={[styles.deckLead, compact && styles.deckItemCompact]}><ProjectSlide caso={projects[0]} variant="lead" compact={compact} onPress={() => openProject(projects[0].repo, projects[0].indice)} /></View>
+          <View style={[styles.deckSide, compact && styles.deckItemCompact]}><ProjectSlide caso={projects[1]} variant="data" compact={compact} onPress={() => openProject(projects[1].repo, projects[1].indice)} /></View>
         </View>
         <View style={[styles.deckRow, styles.deckRowBottom, compact && styles.deckRowCompact]}>
-          <View style={styles.deckQuote}><ProjectSlide caso={projects[2]} variant="quote" compact={compact} onPress={() => openProject(projects[2].repo, projects[2].indice)} /></View>
-          <View style={styles.deckSystem}><ProjectSlide caso={projects[3]} variant="system" compact={compact} onPress={() => openProject(projects[3].repo, projects[3].indice)} /></View>
+          <View style={[styles.deckQuote, compact && styles.deckItemCompact]}><ProjectSlide caso={projects[2]} variant="quote" compact={compact} onPress={() => openProject(projects[2].repo, projects[2].indice)} /></View>
+          <View style={[styles.deckSystem, compact && styles.deckItemCompact]}><ProjectSlide caso={projects[3]} variant="system" compact={compact} onPress={() => openProject(projects[3].repo, projects[3].indice)} /></View>
         </View>
       </View>
     </View>
@@ -139,17 +153,31 @@ const styles = StyleSheet.create({
   missionMascot: { marginBottom: -56, marginRight: 66, zIndex: 2, transform: [{ rotate: '7deg' }] },
   headingCount: { color: colors.violet, fontFamily: fonts.display, fontSize: 70, lineHeight: 68, fontWeight: '900' },
   headingNote: { maxWidth: 280, color: colors.fog, fontFamily: fonts.mono, fontSize: 8, lineHeight: 15, letterSpacing: 0.7, textAlign: 'right' },
+  operationRail: { height: 92, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', position: 'relative', marginHorizontal: layout.gutter, marginBottom: 30, paddingHorizontal: 28, borderWidth: 1, borderColor: colors.navy },
+  operationRailCompact: { height: 68, marginHorizontal: layout.mobileGutter, marginBottom: 22, paddingHorizontal: 16 },
+  operationLine: { position: 'absolute', left: 44, right: 44, top: 37, height: 1, backgroundColor: colors.violet },
+  operationPoint: { zIndex: 1, maxWidth: '23%', alignItems: 'center', gap: 8 },
+  operationNode: { width: 30, height: 30, alignItems: 'center', justifyContent: 'center', borderRadius: 17, borderWidth: 1, borderColor: colors.violet, backgroundColor: colors.ink },
+  operationNodeActive: { borderColor: colors.acid, backgroundColor: colors.acid },
+  operationNodeText: { color: colors.paper, fontFamily: fonts.mono, fontSize: 7, fontWeight: '700' },
+  operationNodeTextActive: { color: colors.ink },
+  operationLabel: { maxWidth: 150, color: colors.fog, fontFamily: fonts.mono, fontSize: 6, fontWeight: '700', letterSpacing: 0.5 },
   deck: { paddingHorizontal: layout.gutter, gap: 12 },
   deckCompact: { paddingHorizontal: layout.mobileGutter },
   deckRow: { minHeight: 570, flexDirection: 'row', gap: 12 },
   deckRowBottom: { minHeight: 480 },
   deckRowCompact: { minHeight: 0, flexDirection: 'column' },
-  deckLead: { flex: 1.35 },
-  deckSide: { flex: 0.75 },
-  deckQuote: { flex: 0.82 },
-  deckSystem: { flex: 1.18 },
+  deckLead: { flex: 1.35, transform: [{ rotate: '-0.7deg' }] },
+  deckSide: { flex: 0.75, transform: [{ translateY: 13 }, { rotate: '0.8deg' }] },
+  deckQuote: { flex: 0.82, transform: [{ translateY: -5 }, { rotate: '0.6deg' }] },
+  deckSystem: { flex: 1.18, transform: [{ rotate: '-0.5deg' }] },
+  deckItemCompact: { transform: [{ translateY: 0 }, { rotate: '0deg' }] },
   slide: { flex: 1, minHeight: 460, position: 'relative', overflow: 'hidden', borderWidth: 1, borderColor: colors.navy },
   slideActive: { transform: [{ translateY: -4 }], borderColor: colors.acid },
+  dossierTab: { position: 'absolute', zIndex: 5, left: 0, top: 50, width: 38, height: 58, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.acid, borderRightWidth: 1, borderTopWidth: 1, borderBottomWidth: 1, borderColor: colors.ink },
+  dossierTabDark: { backgroundColor: colors.ink },
+  dossierTabText: { color: colors.ink, fontFamily: fonts.display, fontSize: 23, lineHeight: 24, fontWeight: '900', transform: [{ rotate: '-90deg' }] },
+  dossierTabTextDark: { color: colors.paper },
   leadSlide: { backgroundColor: colors.navy },
   fullImage: { width: '100%', height: '100%', backgroundColor: colors.navy },
   leadShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(7,13,27,0.2)' },

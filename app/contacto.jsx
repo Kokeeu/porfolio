@@ -13,6 +13,7 @@ export default function ContactPage() {
     <MenuPageShell
       accent={PINK}
       code="COMMS_LINK"
+      mode="contact"
       title="Contacto"
       description="Contacto y enlaces profesionales de Anderson Solano."
     >

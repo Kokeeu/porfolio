@@ -10,6 +10,7 @@ export default function MissionsPage() {
     <MenuPageShell
       accent={colors.acid}
       code="MISSION_SELECT"
+      mode="missions"
       title="Misiones"
       description="Casos de estudio y productos digitales seleccionados de Anderson Solano."
     >

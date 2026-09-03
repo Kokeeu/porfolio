@@ -10,6 +10,7 @@ export default function ProfilePage() {
     <MenuPageShell
       accent={colors.paper}
       code="PROFILE_01"
+      mode="profile"
       title="Perfil"
       description="Perfil de Anderson Solano, desarrollador frontend creativo en Costa Rica."
     >

@@ -10,6 +10,7 @@ export default function LoadoutPage() {
     <MenuPageShell
       accent={colors.violet}
       code="BUILD_SYSTEM_VISUAL_R&D"
+      mode="loadout"
       title="Loadout + Lab"
       description="Método, capacidades, herramientas y exploración visual de Anderson Solano."
     >
