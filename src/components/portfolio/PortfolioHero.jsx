@@ -5,10 +5,10 @@ import { colors, fonts, layout } from '../../design/tokens';
 import MascotSticker from './MascotSticker';
 
 const menuItems = [
-  { key: 'work', index: '01', label: 'MISIONES', eyebrow: 'CASOS SELECCIONADOS', description: 'Cuatro productos, cuatro problemas reales y las decisiones que les dieron forma.', icon: 'map-outline', accent: colors.pink, ink: colors.paper },
-  { key: 'loadout', index: '02', label: 'LOADOUT + LAB', eyebrow: 'MÉTODO Y EXPERIMENTOS', description: 'Mi sistema de trabajo, herramientas y exploraciones visuales en una sola ruta.', icon: 'construct-outline', accent: colors.blue, ink: colors.paper },
-  { key: 'profile', index: '03', label: 'PERFIL', eyebrow: 'PLAYER FILE', description: 'Quién soy, desde dónde trabajo y qué clase de experiencias quiero construir.', icon: 'person-outline', accent: colors.paper, ink: colors.ink },
-  { key: 'contact', index: '04', label: 'CONTACTO', eyebrow: 'OPEN CHANNEL', description: 'Un canal directo para proyectos que necesitan criterio, carácter y código.', icon: 'paper-plane-outline', accent: colors.cyan, ink: colors.ink },
+  { key: 'work', index: '01', label: 'MISIONES', eyebrow: 'CASOS SELECCIONADOS', description: 'Cuatro productos, cuatro problemas reales y las decisiones que les dieron forma.', icon: 'map-outline', accent: colors.pink, ink: colors.paper, variant: 'ribbon', activeScale: 1.1, activeShift: 27 },
+  { key: 'loadout', index: '02', label: 'LOADOUT + LAB', eyebrow: 'MÉTODO Y EXPERIMENTOS', description: 'Mi sistema de trabajo, herramientas y exploraciones visuales en una sola ruta.', icon: 'construct-outline', accent: colors.blue, ink: colors.paper, variant: 'modules', activeScale: 1.04, activeShift: 12 },
+  { key: 'profile', index: '03', label: 'PERFIL', eyebrow: 'PLAYER FILE', description: 'Quién soy, desde dónde trabajo y qué clase de experiencias quiero construir.', icon: 'person-outline', accent: colors.paper, ink: colors.ink, variant: 'dossier', activeScale: 1.055, activeShift: 12 },
+  { key: 'contact', index: '04', label: 'CONTACTO', eyebrow: 'OPEN CHANNEL', description: 'Un canal directo para proyectos que necesitan criterio, carácter y código.', icon: 'paper-plane-outline', accent: colors.cyan, ink: colors.ink, variant: 'broadcast', activeScale: 1.07, activeShift: 15 },
 ];
 
 function useReducedMotion() {
@@ -23,11 +23,74 @@ function useReducedMotion() {
   return reduced;
 }
 
+function OptionDecor({ energy, item, reduced, selected }) {
+  const surface = selected ? item.accent : colors.ink;
+
+  if (item.variant === 'ribbon') {
+    const tipScale = reduced ? 1 : energy.interpolate({ inputRange: [0, 1], outputRange: [0.74, 1] });
+    return (
+      <View pointerEvents="none" style={styles.decorFill}>
+        <Animated.View style={[styles.ribbonTip, { backgroundColor: surface, borderColor: selected ? colors.ink : item.accent, transform: [{ rotate: '45deg' }, { scale: tipScale }] }]} />
+        <View style={styles.ribbonCuts}>
+          <View style={[styles.ribbonCut, { backgroundColor: selected ? colors.paper : item.accent }]} />
+          <View style={[styles.ribbonCut, styles.ribbonCutShort, { backgroundColor: selected ? colors.paper : item.accent }]} />
+          <View style={[styles.ribbonCut, { backgroundColor: selected ? colors.paper : item.accent }]} />
+        </View>
+      </View>
+    );
+  }
+
+  if (item.variant === 'modules') {
+    const spreadTop = reduced ? 0 : energy.interpolate({ inputRange: [0, 1], outputRange: [0, -9] });
+    const spreadBottom = reduced ? 0 : energy.interpolate({ inputRange: [0, 1], outputRange: [0, 9] });
+    return (
+      <View pointerEvents="none" style={styles.decorFill}>
+        <Animated.View style={[styles.moduleRail, styles.moduleRailTop, { transform: [{ translateY: spreadTop }] }]}>
+          {[0, 1, 2].map((block) => <View key={block} style={[styles.moduleBlock, block === 1 && styles.moduleBlockWide, { backgroundColor: item.accent }]} />)}
+        </Animated.View>
+        <Animated.View style={[styles.moduleRail, styles.moduleRailBottom, { transform: [{ translateY: spreadBottom }] }]}>
+          {[0, 1, 2].map((block) => <View key={block} style={[styles.moduleBlock, block === 0 && styles.moduleBlockWide, { backgroundColor: item.accent }]} />)}
+        </Animated.View>
+        <View style={[styles.moduleDivider, { backgroundColor: item.accent }]} />
+      </View>
+    );
+  }
+
+  if (item.variant === 'dossier') {
+    return (
+      <View pointerEvents="none" style={styles.decorFill}>
+        <View style={[styles.dossierInset, { borderColor: selected ? colors.ink : colors.paper }]} />
+        <View style={[styles.dossierTab, { backgroundColor: colors.pink }]} />
+        <View style={[styles.dossierHole, { borderColor: selected ? colors.ink : colors.paper }]} />
+      </View>
+    );
+  }
+
+  const pulseScaleA = reduced ? 0.7 : energy.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] });
+  const pulseScaleB = reduced ? 0.45 : energy.interpolate({ inputRange: [0, 1], outputRange: [0.15, 0.78] });
+  const pulseOpacity = reduced ? 0 : energy;
+
+  return (
+    <View pointerEvents="none" style={styles.decorFill}>
+      <View style={[styles.broadcastCap, { borderColor: item.accent }]} />
+      <View style={styles.broadcastPulses}>
+        <Animated.View style={[styles.broadcastPulse, { backgroundColor: item.accent, opacity: pulseOpacity, transform: [{ scaleX: pulseScaleA }] }]} />
+        <Animated.View style={[styles.broadcastPulse, styles.broadcastPulseShort, { backgroundColor: item.accent, opacity: pulseOpacity, transform: [{ scaleX: pulseScaleB }] }]} />
+      </View>
+    </View>
+  );
+}
+
 function RouteMenu({ activeIndex, compact, mobile, onLaunch, onSelect, reduced }) {
   const focusRefs = useRef([]);
   const energies = useRef(menuItems.map((_, index) => new Animated.Value(index === 0 ? 1 : 0))).current;
 
   useEffect(() => {
+    if (reduced) {
+      energies.forEach((energy, index) => energy.setValue(index === activeIndex ? 1 : 0));
+      return;
+    }
+
     Animated.parallel(energies.map((energy, index) => Animated.spring(energy, {
       toValue: index === activeIndex ? 1 : 0,
       damping: 16,
@@ -52,8 +115,9 @@ function RouteMenu({ activeIndex, compact, mobile, onLaunch, onSelect, reduced }
       {menuItems.map((item, index) => {
         const selected = index === activeIndex;
         const onRight = index > 1;
-        const scale = energies[index].interpolate({ inputRange: [0, 1], outputRange: [0.94, 1.1] });
-        const translateX = energies[index].interpolate({ inputRange: [0, 1], outputRange: [0, onRight ? -16 : 16] });
+        const scale = energies[index].interpolate({ inputRange: [0, 1], outputRange: [0.96, item.activeScale] });
+        const translateX = energies[index].interpolate({ inputRange: [0, 1], outputRange: [0, onRight ? -item.activeShift : item.activeShift] });
+        const tilt = energies[index].interpolate({ inputRange: [0, 1], outputRange: ['0deg', item.variant === 'dossier' ? '-2.5deg' : '0deg'] });
         const foreground = selected ? item.ink : colors.paper;
 
         return (
@@ -65,7 +129,7 @@ function RouteMenu({ activeIndex, compact, mobile, onLaunch, onSelect, reduced }
               !compact && styles[`optionPosition${index}`],
             ]}
           >
-            <Animated.View style={{ transform: reduced ? [] : [{ translateX }, { scale }] }}>
+            <Animated.View style={{ transform: reduced ? [{ scale: selected ? 1.01 : 1 }] : [{ translateX }, { scale }, { rotate: tilt }] }}>
               <Pressable
                 ref={(node) => { focusRefs.current[index] = node; }}
                 accessibilityRole="menuitem"
@@ -77,13 +141,15 @@ function RouteMenu({ activeIndex, compact, mobile, onLaunch, onSelect, reduced }
                 onPress={() => onLaunch(item.key, item.index)}
                 style={({ pressed }) => [
                   styles.option,
+                  styles[`${item.variant}Option`],
                   mobile && styles.optionMobile,
                   onRight && !compact && styles.optionRight,
                   { backgroundColor: selected ? item.accent : colors.ink, borderColor: selected ? colors.ink : item.accent },
                   pressed && styles.optionPressed,
                 ]}
               >
-                <View style={[styles.iconDisk, { backgroundColor: selected ? item.ink : item.accent }]}>
+                <OptionDecor energy={energies[index]} item={item} reduced={reduced} selected={selected} />
+                <View style={[styles.iconDisk, styles[`${item.variant}Icon`], { backgroundColor: selected ? item.ink : item.accent }]}>
                   <Ionicons name={item.icon} size={mobile ? 18 : 22} color={selected ? item.accent : colors.ink} />
                 </View>
                 <View style={styles.optionCopy}>
@@ -213,17 +279,43 @@ const styles = StyleSheet.create({
   optionPosition1: { left: '8%', top: 390, transform: [{ rotate: '3deg' }] },
   optionPosition2: { right: '4%', top: 215, transform: [{ rotate: '4deg' }] },
   optionPosition3: { right: '8%', top: 370, transform: [{ rotate: '-4deg' }] },
-  option: { minHeight: 86, flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 16, borderWidth: 2 },
+  option: { minHeight: 86, position: 'relative', overflow: 'visible', flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 16, borderWidth: 2 },
+  ribbonOption: { borderLeftWidth: 10, paddingRight: 27 },
+  modulesOption: { minHeight: 92, marginVertical: 7, borderWidth: 3 },
+  dossierOption: { minHeight: 96, marginTop: 4, borderWidth: 2, borderBottomWidth: 7 },
+  broadcastOption: { minHeight: 82, borderRadius: 44, borderWidth: 3, paddingHorizontal: 20 },
   optionRight: { flexDirection: 'row-reverse' },
   optionMobile: { minHeight: 70, gap: 11, paddingHorizontal: 12 },
   optionPressed: { opacity: 0.66 },
-  iconDisk: { width: 48, height: 48, borderRadius: 25, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: colors.ink },
-  optionCopy: { flex: 1, minWidth: 0 },
+  decorFill: { ...StyleSheet.absoluteFillObject },
+  ribbonTip: { position: 'absolute', zIndex: -1, right: -14, top: 13, width: 58, height: 58, borderWidth: 2 },
+  ribbonCuts: { position: 'absolute', right: 39, top: 7, flexDirection: 'row', gap: 5, transform: [{ rotate: '-24deg' }] },
+  ribbonCut: { width: 4, height: 22 },
+  ribbonCutShort: { height: 14 },
+  moduleRail: { position: 'absolute', left: 24, right: 24, height: 9, flexDirection: 'row', gap: 5 },
+  moduleRailTop: { top: -7, justifyContent: 'flex-start' },
+  moduleRailBottom: { bottom: -7, justifyContent: 'flex-end' },
+  moduleBlock: { width: 25, height: 9 },
+  moduleBlockWide: { width: 52 },
+  moduleDivider: { position: 'absolute', left: 73, top: 13, bottom: 13, width: 2, opacity: 0.45 },
+  dossierInset: { position: 'absolute', left: 7, right: 7, top: 7, bottom: 10, borderWidth: 1, opacity: 0.72 },
+  dossierTab: { position: 'absolute', left: 27, top: -11, width: 82, height: 11 },
+  dossierHole: { position: 'absolute', right: 16, top: 13, width: 9, height: 9, borderRadius: 5, borderWidth: 2 },
+  broadcastCap: { position: 'absolute', left: -19, top: 18, width: 42, height: 42, borderRadius: 23, borderWidth: 3 },
+  broadcastPulses: { position: 'absolute', left: -67, top: 28, width: 55, gap: 8, alignItems: 'flex-end' },
+  broadcastPulse: { width: 55, height: 4, borderRadius: 3 },
+  broadcastPulseShort: { width: 38 },
+  iconDisk: { zIndex: 2, width: 48, height: 48, borderRadius: 25, alignItems: 'center', justifyContent: 'center', borderWidth: 3, borderColor: colors.ink },
+  ribbonIcon: { borderRadius: 0, transform: [{ rotate: '45deg' }] },
+  modulesIcon: { borderRadius: 3 },
+  dossierIcon: { borderRadius: 0, borderWidth: 2 },
+  broadcastIcon: { borderRadius: 25, borderStyle: 'dashed' },
+  optionCopy: { zIndex: 2, flex: 1, minWidth: 0 },
   optionCopyRight: { textAlign: 'right' },
   optionEyebrow: { fontFamily: fonts.mono, fontSize: 7, fontWeight: '700', letterSpacing: 0.7 },
   optionLabel: { marginTop: 1, color: colors.paper, fontFamily: fonts.display, fontSize: 36, lineHeight: 37, fontWeight: '900', letterSpacing: 0.1 },
   optionLabelMobile: { fontSize: 30, lineHeight: 31 },
-  optionArrow: { fontFamily: fonts.sans, fontSize: 16, fontWeight: '900' },
+  optionArrow: { zIndex: 2, fontFamily: fonts.sans, fontSize: 16, fontWeight: '900' },
   mascotCore: { position: 'absolute', zIndex: 3, left: '50%', top: 205, alignItems: 'center', justifyContent: 'center', marginLeft: -165 },
   mascotCoreCompact: { position: 'relative', left: 0, top: 0, alignSelf: 'center', marginLeft: 0, marginTop: -4 },
   coreOrbit: { position: 'absolute', width: '92%', height: '92%', borderRadius: 999, borderWidth: 2, borderStyle: 'dashed', transform: [{ rotate: '9deg' }] },
